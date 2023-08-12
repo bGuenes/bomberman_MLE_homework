@@ -1,9 +1,10 @@
 import os
 import pickle
 import random
+import torch
+from torch import nn
 
 import numpy as np
-
 
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 
@@ -22,6 +23,7 @@ def setup(self):
 
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
+
     if self.train or not os.path.isfile("my-saved-model.pt"):
         self.logger.info("Setting up model from scratch.")
         weights = np.random.rand(len(ACTIONS))
@@ -41,15 +43,25 @@ def act(self, game_state: dict) -> str:
     :param game_state: The dictionary that describes everything on the board.
     :return: The action to take as a string.
     """
+
     # todo Exploration vs exploitation
     random_prob = .1
-    if self.train and random.random() < random_prob:
+    exploration_rate = random.random()  # exploration rate
+
+    # Explore in training with probability of random_prob
+    if self.train and exploration_rate < random_prob:
         self.logger.debug("Choosing action purely at random.")
         # 80%: walk in any direction. 10% wait. 10% bomb.
         return np.random.choice(ACTIONS, p=[.2, .2, .2, .2, .1, .1])
 
-    self.logger.debug("Querying model for action.")
-    return np.random.choice(ACTIONS, p=self.model)
+    # Exploit
+    else:
+        game_field = state_to_features(game_state)
+        print(game_field)
+        print()
+        self.logger.debug("Choosing action based on NN.")
+        if game_state["self"][2]: return "BOMB"
+        else: return "UP"
 
 
 def state_to_features(game_state: dict) -> np.array:
@@ -70,10 +82,41 @@ def state_to_features(game_state: dict) -> np.array:
     if game_state is None:
         return None
 
-    # For example, you could construct several channels of equal shape, ...
-    channels = []
-    channels.append(...)
-    # concatenate them as a feature tensor (they must have the same shape), ...
-    stacked_channels = np.stack(channels)
-    # and return them as a vector
-    return stacked_channels.reshape(-1)
+    # Load the states
+    field = game_state["field"]
+    bombs = game_state["bombs"]
+    explosion_map = game_state["explosion_map"]
+    coins = game_state["coins"]
+    agent = game_state["self"]
+    others = game_state["others"]
+
+    # make new game field with info from field, bombs, explosion_map and coins
+    game_field = field + 1
+
+    for i in coins:
+        game_field[i] = 3  # coins are added as 3
+
+    for i in others:
+        game_field[i[3]] = i[1]  # other agents position set to their score
+
+    for i in bombs:
+        for x in range(-3, 4):
+            x = i[0][0] + x
+            y = i[0][1]
+            if 0 < x < field.shape[0]:
+                if game_field[x, y] > 0:
+                    game_field[(x, y)] = -1  # sets ticking bomb to -1
+
+        for y in range(-3, 4):
+            x = i[0][0]
+            y = i[0][1]+y
+            if 0 < y < field.shape[1]:
+                if game_field[x, y] > 0:
+                    game_field[(x, y)] = -1  # sets ticking bomb to -1
+
+    if game_field[agent[3]] >= 0:
+        game_field[agent[3]] = 0  # own agents position is 0 if no bomb
+
+    game_field[explosion_map != 0] = -2
+
+    return game_field
