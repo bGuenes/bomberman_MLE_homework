@@ -60,6 +60,7 @@ def act(self, game_state: dict) -> str:
         print(game_field)
         print()
         self.logger.debug("Choosing action based on NN.")
+
         if game_state["self"][2]: return "BOMB"
         else: return "UP"
 
@@ -96,26 +97,43 @@ def state_to_features(game_state: dict) -> np.array:
     for i in coins:
         game_field[i] = 3  # coins are added as 3
 
-    for i in others:
-        game_field[i[3]] = i[1]  # other agents position set to their score
-
     for i in bombs:
-        for x in range(-3, 4):
-            x = i[0][0] + x
-            y = i[0][1]
-            if 0 < x < field.shape[0]:
-                if game_field[x, y] > 0:
-                    game_field[(x, y)] = -1  # sets ticking bomb to -1
+        x_bomb = i[0][0]
+        y_bomb = i[0][1]
+        range_bomb = [1, 2, 3]
 
-        for y in range(-3, 4):
-            x = i[0][0]
-            y = i[0][1]+y
-            if 0 < y < field.shape[1]:
-                if game_field[x, y] > 0:
-                    game_field[(x, y)] = -1  # sets ticking bomb to -1
+        game_field[x_bomb, y_bomb] = -1
 
-    if game_field[agent[3]] >= 0:
+        for j in range_bomb:
+            if game_field[x_bomb+j, y_bomb] in {0, 2}:
+                break
+            else:
+                game_field[x_bomb+j, y_bomb] = -1
+
+        for j in range_bomb:
+            if game_field[x_bomb-j, y_bomb] in {0, 2}:
+                break
+            else:
+                game_field[x_bomb-j, y_bomb] = -1
+
+        for j in range_bomb:
+            if game_field[x_bomb, y_bomb+j] in {0, 2}:
+                break
+            else:
+                game_field[x_bomb, y_bomb+j] = -1
+
+        for j in range_bomb:
+            if game_field[x_bomb, y_bomb-j] in {0, 2}:
+                break
+            else:
+                game_field[x_bomb, y_bomb-j] = -1
+
+    if game_field[agent[3]] > 0:
         game_field[agent[3]] = 0  # own agents position is 0 if no bomb
+
+    for i in others:
+        if game_field[i[3]] > 0:
+            game_field[i[3]] = max(5, i[1])  # other agents position set to their score, but at least 5
 
     game_field[explosion_map != 0] = -2
 
