@@ -3,6 +3,8 @@ import pickle
 import random
 import torch
 from torch import nn
+from tensordict import TensorDict
+from torchrl.data import TensorDictReplayBuffer, LazyMemmapStorage
 
 import numpy as np
 
@@ -28,6 +30,11 @@ def setup(self):
         self.logger.info("Setting up model from scratch.")
         weights = np.random.rand(len(ACTIONS))
         self.model = weights / weights.sum()
+
+        # setup training cache
+        self.memory = TensorDictReplayBuffer(storage=LazyMemmapStorage(100000, device=torch.device("cpu")))
+        self.batch_size = 32
+
     else:
         self.logger.info("Loading model from saved state.")
         with open("my-saved-model.pt", "rb") as file:
@@ -50,22 +57,36 @@ def act(self, game_state: dict) -> str:
 
     # Explore in training with probability of random_prob
     if self.train and exploration_rate < random_prob:
-        self.logger.debug("Choosing action purely at random.")
+        game_field = state_to_features(game_state)
+
         # 80%: walk in any direction. 10% wait. 10% bomb.
-        return np.random.choice(ACTIONS, p=[.2, .2, .2, .2, .1, .1])
+        self.logger.debug("Choosing action purely at random.")
+        random_choice = np.random.choice(ACTIONS, p=[.2, .2, .2, .2, .1, .1])
+
+        # cache action
+
+        return random_choice
+
 
     # Exploit
     else:
-        game_field = state_to_features(game_state)
-        print(game_field)
-        print()
-        self.logger.debug("Choosing action based on NN.")
+        game_field = state_to_reward(game_state)
+        features = state_to_features(game_state)
+        print(features)
 
+        self.logger.debug("Choosing action based on NN.")
+        # ask NN here for output
         if game_state["self"][2]: return "BOMB"
         else: return "UP"
 
+def cache(self, action, state):
+    state = torch.tensor(state)
+    action = torch.tensor(action)
 
-def state_to_features(game_state: dict) -> np.array:
+    self.memory.add(Ten)
+
+
+def state_to_reward(game_state: dict) -> np.array:
     """
     *This is not a required function, but an idea to structure your code.*
 
@@ -138,3 +159,13 @@ def state_to_features(game_state: dict) -> np.array:
     game_field[explosion_map != 0] = -2
 
     return game_field
+
+def state_to_features(game_state: dict) -> np.array:
+
+    coin_map = np.zeros(game_state["field"].shape)
+    for i in game_state["coins"]:
+        coin_map[i] = 1
+
+    features = [coin_map.tolist(), game_state["field"].tolist(), list(game_state["self"][3])]
+
+    return features

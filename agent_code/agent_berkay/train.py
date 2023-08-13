@@ -6,6 +6,9 @@ from typing import List
 import events as e
 from .callbacks import state_to_features
 
+import torch
+from torch import nn
+
 # This is only an example!
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
