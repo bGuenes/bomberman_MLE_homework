@@ -48,7 +48,7 @@ def act(self, game_state: dict) -> str:
 
     if self.train:
         sample = random.random()
-        eps_threshold = 0.6
+        eps_threshold = 0.2
 
         if sample > eps_threshold:
             with torch.no_grad():
@@ -56,13 +56,11 @@ def act(self, game_state: dict) -> str:
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
                 action_done = self.policy_net(features).max(1)[1].view(1, 1)
-                # print(ACTIONS[action_done])
         else:
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.25, .25, .25, .25, 0, 0])]],
                                        dtype=torch.long)
     else:
         action_done = self.model(features).max(1)[1].view(1, 1)
-        print(ACTIONS[action_done])
 
     return ACTIONS[action_done]
 

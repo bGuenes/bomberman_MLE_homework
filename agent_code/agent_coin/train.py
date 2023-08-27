@@ -24,11 +24,11 @@ TRANSITION_HISTORY_SIZE = 1000  # keep only ... last transitions
 RECORD_ENEMY_TRANSITIONS = 1.0  # record enemy transitions with probability ...
 
 # Events
-GETTING_CLOSER = "CLOSER"
-GETTING_AWAY = "AWAY"
+GETTING_CLOSER = "GETTING_CLOSER"
+GETTING_AWAY = "GETTING_AWAY"
 
 # params
-BATCH_SIZE = 150
+BATCH_SIZE = 200
 GAMMA = 0.5
 TAU = 0.05
 LR = 1e-3
@@ -110,16 +110,14 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     elif closer < 0:
         events.append(GETTING_AWAY)
 
-    #for event in events:
-    #    if event == e.COIN_COLLECTED:
-    #        print('collected coin!')
+    #print(events)
 
     # state_to_features is defined in callbacks.py
     self.memory.push(
         torch.tensor(state_to_features(old_game_state)).unsqueeze(0),
         torch.tensor([[ACTIONS.index(self_action)]]), 
         torch.tensor(state_to_features(new_game_state)).unsqueeze(0), 
-        torch.tensor([reward_from_events(self, events)])
+        torch.tensor([reward_from_events(self, events, closer)])
         )
 
 def end_of_round(self, last_game_state: dict, last_action: str, events: List[str]):
@@ -181,18 +179,19 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
         pickle.dump(self.policy_net, file)
 
 
-def reward_from_events(self, events: List[str]) -> int:
+def reward_from_events(self, events: List[str], closer: int) -> int:
     """
     *This is not a required function, but an idea to structure your code.*
 
     Here you can modify the rewards your agent get so as to en/discourage
     certain behavior.
     """
+
     game_rewards = {
         e.COIN_COLLECTED: 10,
-        GETTING_CLOSER: 5,
-        GETTING_AWAY: -5,
-        e.INVALID_ACTION: -10  # don't make invalid actions!
+        GETTING_CLOSER: closer,
+        GETTING_AWAY: closer,
+        e.INVALID_ACTION: -3  # don't make invalid actions!
     }
     reward_sum = 0
     for event in events:
@@ -208,17 +207,22 @@ def getting_closer(old_game_state: dict, new_game_state: dict):
     my_pos_old = old_game_state["self"][3]
     my_pos_new = new_game_state["self"][3]
 
-    closest_coin = (99, 99)
-
+    closest_coin = coins[0]
     for i in coins:
         x_dis = abs(i[0] - my_pos_old[0])
         y_dis = abs(i[1] - my_pos_old[1])
         dis = x_dis + y_dis
 
-        if dis < sum(closest_coin):
+        dis_closest_coin = abs(closest_coin[0] - my_pos_old[0]) + abs(closest_coin[1] - my_pos_old[1])
+        if dis < dis_closest_coin:
             closest_coin = i
 
     dis_old = abs(closest_coin[0] - my_pos_old[0]) + abs(closest_coin[1] - my_pos_old[1])
     dis_new = abs(closest_coin[0] - my_pos_new[0]) + abs(closest_coin[1] - my_pos_new[1])
 
-    return dis_old - dis_new
+    if dis_old < dis_new:
+        return -1 * dis_new
+    elif dis_old > dis_new:
+        return dis_old
+    else:
+        return 0
