@@ -2,9 +2,6 @@ import os
 import pickle
 import random
 import torch
-from torch import nn
-from tensordict import TensorDict
-from torchrl.data import TensorDictReplayBuffer, LazyMemmapStorage
 
 import numpy as np
 import math
@@ -28,9 +25,8 @@ def setup(self):
 
     if self.train or not os.path.isfile("my-saved-model.pt"):
         print("Setting up model from scratch.")
-        #weights = np.random.rand(len(ACTIONS))
-        #self.model = weights / weights.sum()
-        #Make some silly model
+        weights = np.random.rand(len(ACTIONS))
+        self.model = weights / weights.sum()
 
     else:
         print("Loading model from saved state.")
@@ -52,7 +48,7 @@ def act(self, game_state: dict) -> str:
     :return: The action to take as a string.
     """
     features = state_to_features(game_state)
-    features = torch.tensor([features]) #This needs to be a 2 dim thing...
+    features = torch.tensor([features])  # Game state to torch tensor
 
     if self.train:
         global steps_done
@@ -74,12 +70,6 @@ def act(self, game_state: dict) -> str:
         action_done = self.model(features).max(1)[1].view(1, 1)
         print(ACTIONS[action_done])
     return(ACTIONS[action_done])
-
-def cache(self, action, state):
-    state = torch.tensor(state)
-    action = torch.tensor(action)
-
-    self.memory.add(Ten)
 
 
 def state_to_reward(game_state: dict) -> np.array:
@@ -163,5 +153,4 @@ def state_to_features(game_state: dict) -> np.array:
         coin_map[i] = 1
 
     features = coin_map.flatten().tolist() + game_state["field"].flatten().tolist() + list(game_state["self"][3])
-    #print(len(features))
     return features

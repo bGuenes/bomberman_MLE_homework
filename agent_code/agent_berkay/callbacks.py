@@ -31,10 +31,6 @@ def setup(self):
         weights = np.random.rand(len(ACTIONS))
         self.model = weights / weights.sum()
 
-        # setup training cache
-        self.memory = TensorDictReplayBuffer(storage=LazyMemmapStorage(100000, device=torch.device("cpu")))
-        self.batch_size = 32
-
     else:
         self.logger.info("Loading model from saved state.")
         with open("my-saved-model.pt", "rb") as file:
@@ -83,7 +79,7 @@ def cache(self, action, state):
     state = torch.tensor(state)
     action = torch.tensor(action)
 
-    self.memory.add(Ten)
+    self.memory.add(TensorDict)
 
 
 def state_to_reward(game_state: dict) -> np.array:
