@@ -34,12 +34,6 @@ def setup(self):
             self.model = pickle.load(file)
 
 
-EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 1000
-steps_done = 0
-
-
 def act(self, game_state: dict) -> str:
     """
     Your agent should parse the input, think, and take a decision.
@@ -53,11 +47,9 @@ def act(self, game_state: dict) -> str:
     features = torch.tensor([features])  # Game state to torch tensor
 
     if self.train:
-        global steps_done
         sample = random.random()
-        eps_threshold = 0.2  # EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
-        steps_done += 1
-        action_done = 0
+        eps_threshold = 0.6
+
         if sample > eps_threshold:
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.

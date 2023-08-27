@@ -12,6 +12,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 
 import random
+import numpy as np
 
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 # This is only an example!
@@ -23,7 +24,8 @@ TRANSITION_HISTORY_SIZE = 1000  # keep only ... last transitions
 RECORD_ENEMY_TRANSITIONS = 1.0  # record enemy transitions with probability ...
 
 # Events
-PLACEHOLDER_EVENT = "PLACEHOLDER"
+GETTING_CLOSER = "CLOSER"
+GETTING_AWAY = "AWAY"
 
 # params
 BATCH_SIZE = 150
@@ -102,8 +104,11 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     self.logger.debug(f'Encountered game event(s) {", ".join(map(repr, events))} in step {new_game_state["step"]}')
 
     # Idea: Add your own events to hand out rewards
-    if ...:
-        events.append(PLACEHOLDER_EVENT)
+    closer = getting_closer(old_game_state, new_game_state)
+    if closer > 0:
+        events.append(GETTING_CLOSER)
+    elif closer < 0:
+        events.append(GETTING_AWAY)
 
     #for event in events:
     #    if event == e.COIN_COLLECTED:
@@ -184,13 +189,10 @@ def reward_from_events(self, events: List[str]) -> int:
     certain behavior.
     """
     game_rewards = {
-        e.COIN_COLLECTED: 100,
-        e.KILLED_OPPONENT: 5,
-        e.MOVED_UP: 1,
-        e.MOVED_DOWN: 1,
-        e.MOVED_LEFT: 1,
-        e.MOVED_RIGHT: 1,
-        e.INVALID_ACTION: -3  # don't make invalid actions!
+        e.COIN_COLLECTED: 10,
+        GETTING_CLOSER: 5,
+        GETTING_AWAY: -5,
+        e.INVALID_ACTION: -10  # don't make invalid actions!
     }
     reward_sum = 0
     for event in events:
@@ -199,3 +201,24 @@ def reward_from_events(self, events: List[str]) -> int:
 
     self.logger.info(f"Awarded {reward_sum} for events {', '.join(events)}")
     return reward_sum
+
+
+def getting_closer(old_game_state: dict, new_game_state: dict):
+    coins = old_game_state["coins"]
+    my_pos_old = old_game_state["self"][3]
+    my_pos_new = new_game_state["self"][3]
+
+    closest_coin = (99, 99)
+
+    for i in coins:
+        x_dis = abs(i[0] - my_pos_old[0])
+        y_dis = abs(i[1] - my_pos_old[1])
+        dis = x_dis + y_dis
+
+        if dis < sum(closest_coin):
+            closest_coin = i
+
+    dis_old = abs(closest_coin[0] - my_pos_old[0]) + abs(closest_coin[1] - my_pos_old[1])
+    dis_new = abs(closest_coin[0] - my_pos_new[0]) + abs(closest_coin[1] - my_pos_new[1])
+
+    return dis_old - dis_new
