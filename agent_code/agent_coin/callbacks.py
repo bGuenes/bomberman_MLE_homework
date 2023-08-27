@@ -4,9 +4,9 @@ import random
 import torch
 
 import numpy as np
-import math
 
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
+
 
 def setup(self):
     """
@@ -33,10 +33,12 @@ def setup(self):
         with open("my-saved-model.pt", "rb") as file:
             self.model = pickle.load(file)
 
+
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000
 steps_done = 0
+
 
 def act(self, game_state: dict) -> str:
     """
@@ -53,8 +55,7 @@ def act(self, game_state: dict) -> str:
     if self.train:
         global steps_done
         sample = random.random()
-        eps_threshold = EPS_END + (EPS_START - EPS_END) * \
-            math.exp(-1. * steps_done / EPS_DECAY)
+        eps_threshold = 0.2  # EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
         action_done = 0
         if sample > eps_threshold:
@@ -63,13 +64,15 @@ def act(self, game_state: dict) -> str:
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
                 action_done = self.policy_net(features).max(1)[1].view(1, 1)
-                #print(ACTIONS[action_done])
+                # print(ACTIONS[action_done])
         else:
-            action_done = torch.tensor([[np.random.choice([i for i in range(0,6)], p=[.25, .25, .25, .25, 0, 0])]], dtype=torch.long)
+            action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.25, .25, .25, .25, 0, 0])]],
+                                       dtype=torch.long)
     else:
         action_done = self.model(features).max(1)[1].view(1, 1)
         print(ACTIONS[action_done])
-    return(ACTIONS[action_done])
+
+    return ACTIONS[action_done]
 
 
 def state_to_reward(game_state: dict) -> np.array:
@@ -145,6 +148,7 @@ def state_to_reward(game_state: dict) -> np.array:
     game_field[explosion_map != 0] = -2
 
     return game_field
+
 
 def state_to_features(game_state: dict) -> np.array:
 
