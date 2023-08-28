@@ -4,6 +4,7 @@ import random
 import torch
 
 import numpy as np
+import math as m
 
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 
@@ -47,16 +48,22 @@ def act(self, game_state: dict) -> str:
     features = torch.tensor([features])  # Game state to torch tensor
 
     if self.train:
+        eps_start = 0.9
+        eps_end = 0.1
+        eps_decay = 1000
+        round = 1
         sample = random.random()
-        eps_threshold = 0.5  # higher -> more random
+        eps_threshold = 0.5  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
+            round += 1
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
                 action_done = self.policy_net(features).max(1)[1].view(1, 1)
         else:
+            round += 1
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.25, .25, .25, .25, 0, 0])]],
                                        dtype=torch.long)
     else:
