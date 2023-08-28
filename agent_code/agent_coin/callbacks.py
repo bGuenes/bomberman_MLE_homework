@@ -48,7 +48,7 @@ def act(self, game_state: dict) -> str:
 
     if self.train:
         sample = random.random()
-        eps_threshold = 0.2
+        eps_threshold = 0.5  # higher -> more random
 
         if sample > eps_threshold:
             with torch.no_grad():

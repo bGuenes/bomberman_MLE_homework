@@ -74,7 +74,7 @@ def setup_training(self):
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
 
-    n_observations = 580  # length of feature
+    n_observations = 100  # length of feature
     n_actions = 4  # No bombing or waiting for now!
     
     self.policy_net = DQN(n_observations, n_actions)
@@ -189,9 +189,9 @@ def reward_from_events(self, events: List[str], closer: int) -> int:
 
     game_rewards = {
         e.COIN_COLLECTED: 10,
-        GETTING_CLOSER: closer,
-        GETTING_AWAY: closer,
-        e.INVALID_ACTION: -3  # don't make invalid actions!
+        GETTING_CLOSER: 10/closer,
+        GETTING_AWAY: 10/closer,
+        e.INVALID_ACTION: -2  # don't make invalid actions!
     }
     reward_sum = 0
     for event in events:
@@ -225,4 +225,4 @@ def getting_closer(old_game_state: dict, new_game_state: dict):
     elif dis_old > dis_new:
         return dis_old
     else:
-        return 0
+        return 10
