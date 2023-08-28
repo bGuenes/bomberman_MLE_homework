@@ -180,8 +180,8 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     self.target_net.load_state_dict(target_net_state_dict)
 
     print(torch.sum(reward_batch))
-    if "COIN_COLLECTED" in events:
-        print("COIN COLLECTED")
+    #if "COIN_COLLECTED" in events:
+    #    print("COIN COLLECTED")
 
     # Store the model
     with open("my-saved-model.pt", "wb") as file:
@@ -234,4 +234,4 @@ def getting_closer(old_game_state: dict, new_game_state: dict):
     elif dis_old > dis_new:
         return dis_old
     else:
-        return 100
+        return 10

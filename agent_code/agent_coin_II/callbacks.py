@@ -56,7 +56,7 @@ def act(self, game_state: dict) -> str:
         eps_decay = 1000
         round = 1
         sample = random.random()
-        eps_threshold = 0  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
+        eps_threshold = 0.4  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
             round += 1
@@ -195,13 +195,13 @@ def state_to_features(game_state: dict) -> np.array:
         for j in range(0, field_map.shape[1]):
             if field_map[i, j] != 2:  # For now we only care about coins
                 next
-            if j < top:
+            if j < top and field_map[i, j] == 2:
                 coins_outside[0] = 1
-            if j > bottom:
+            if j > bottom and field_map[i, j] == 2:
                 coins_outside[1] = 1
-            if i < left:  # We're on the left side
+            if i < left and field_map[i, j] == 2:  # We're on the left side
                 coins_outside[2] = 1
-            if i > right:
+            if i > right and field_map[i, j] == 2:
                 coins_outside[3] = 1
 
     # print(the_game)
