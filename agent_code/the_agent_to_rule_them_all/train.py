@@ -4,7 +4,7 @@ import pickle
 from typing import List
 
 import events as e
-from .callbacks import state_to_features, state_to_reward
+from .callbacks import state_to_features
 
 import torch
 from torch import nn
@@ -75,7 +75,7 @@ def setup_training(self):
 
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
-    n_observations = 65  # length of feature
+    n_observations = 165  # length of feature
     n_actions = 6  # No bombing or waiting for now!
 
     if self.train and os.path.isfile("my-saved-model.pt"):
@@ -117,8 +117,8 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     elif closer < 0:
         events.append(GETTING_AWAY)
 
-    bomb_reward = bomb_radius(old_game_state, new_game_state)
-    events.append(BOMB_RADIUS)
+    #bomb_reward = bomb_radius(old_game_state, new_game_state)
+    #events.append(BOMB_RADIUS)
 
     #print(events)
 
@@ -127,8 +127,10 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
         torch.tensor(state_to_features(old_game_state)).unsqueeze(0),
         torch.tensor([[ACTIONS.index(self_action)]]), 
         torch.tensor(state_to_features(new_game_state)).unsqueeze(0), 
-        torch.tensor([reward_from_events(self, events, closer, bomb_reward)])
+        torch.tensor([reward_from_events(self, events, closer)])
         )
+
+    self.last_state = new_game_state
 
 def end_of_round(self, last_game_state: dict, last_action: str, events: List[str]):
     """
@@ -143,13 +145,20 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
 
     :param self: The same object that is passed to all of your callbacks.
     """
+    # safe the last step of the round
+    self.memory.push(
+        torch.tensor(state_to_features(self.last_state)).unsqueeze(0),
+        torch.tensor([[ACTIONS.index(last_action)]]),
+        torch.tensor(state_to_features(last_game_state)).unsqueeze(0),
+        torch.tensor([reward_from_events(self, events, 1)])
+    )
+
     self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')
     
     #Let's learn something!
     BATCH_SIZE_CORRECTED = min(BATCH_SIZE, len(self.memory))  # if memory is not big enough for batch size
     transitions = self.memory.sample(BATCH_SIZE_CORRECTED)  # Will need to play with the batch size!
     batch = Transition(*zip(*transitions))
-    
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
                                           batch.next_state)), dtype=torch.bool)
     non_final_next_states = torch.cat([s for s in batch.next_state
@@ -192,7 +201,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
         pickle.dump(self.policy_net, file)
 
 
-def reward_from_events(self, events: List[str], closer: int, bomb_reward: int) -> int:
+def reward_from_events(self, events: List[str], closer: int) -> int:
     """
     *This is not a required function, but an idea to structure your code.*
 
@@ -212,8 +221,7 @@ def reward_from_events(self, events: List[str], closer: int, bomb_reward: int) -
         e.KILLED_SELF: -100,
         e.SURVIVED_ROUND: 5,
         e.BOMB_DROPPED: 2,
-        e.WAITED: -1,
-        BOMB_RADIUS: bomb_reward
+        e.WAITED: -1
     }
     reward_sum = 0
     for event in events:
@@ -252,6 +260,7 @@ def getting_closer(old_game_state: dict, new_game_state: dict):
         else:
             return 10
 
+'''
 def bomb_radius(old_game_state: dict, new_game_state: dict):
     # check if agent is in the bombing radius
     old_feature_map = state_to_reward(old_game_state)
@@ -278,3 +287,4 @@ def bomb_radius(old_game_state: dict, new_game_state: dict):
         return -10
     elif not old_bombing_range and not new_bombing_range:
         return 1
+'''
