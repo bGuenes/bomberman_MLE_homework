@@ -56,7 +56,7 @@ def act(self, game_state: dict) -> str:
         eps_decay = 1000
         round = 1
         sample = random.random()
-        eps_threshold = 0.5  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
+        eps_threshold = 0.4  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
             round += 1
@@ -163,7 +163,7 @@ def state_to_features(game_state: dict) -> np.array:
     bottom = my_pos[1] + reach + 1
 
     # This will be what the agent sees
-    the_game = np.zeros((reach * 2 + 1, reach * 2 + 1))
+    the_game = np.ones((reach * 2 + 1, reach * 2 + 1))
 
     x = 0
     for h in range(left, right):
@@ -205,6 +205,5 @@ def state_to_features(game_state: dict) -> np.array:
             if i > right:
                 outside_map[3, field_value] = 1
 
-
-        features = the_game.flatten().tolist() + outside_map.ravel().tolist()
-        return features
+    features = the_game.flatten().tolist() + outside_map.ravel().tolist()
+    return features
