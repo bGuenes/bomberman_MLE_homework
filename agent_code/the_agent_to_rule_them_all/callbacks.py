@@ -56,7 +56,7 @@ def act(self, game_state: dict) -> str:
         eps_decay = 1000
         round = 1
         sample = random.random()
-        eps_threshold = 0.5  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
+        eps_threshold = 0.1  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
             round += 1
@@ -101,9 +101,13 @@ def state_to_features(game_state: dict) -> np.array:
 
     # --- map with walls (-1), free (0) and crates (1) ---------------------------------------------------------------
     wall_crates = np.zeros((reach * 2 + 1, reach * 2 + 1)) - 1  # outside of game also -1
-    for x in range(left, right):
-        for y in range(bottom, top):
-            wall_crates[x, y] = field[x, y]
+    for coord in vision_coordinates:
+        if not 0 < coord[0] < field.shape[0] or not 0 < coord[1] < field.shape[1]:
+            next
+        else:
+            x = coord[0] - my_pos[0] + reach
+            y = coord[1] - my_pos[1] + reach
+            wall_crates[x, y] = field[coord[0], coord[1]]
 
     # --- map with explosion (-1) free (0) and coins (1) -------------------------------------------------------------
     explosion_coins = np.zeros((reach * 2 + 1, reach * 2 + 1))
@@ -132,8 +136,6 @@ def state_to_features(game_state: dict) -> np.array:
 
     for bomb in bombs:
         if any(sum(bomb[0] == i) == 2 for i in vision_coordinates):
-            next
-        else:
             # coordinate of bomb in our vision matrix
             x_bomb = bomb[0][0] - my_pos[0] + reach
             y_bomb = bomb[0][1] - my_pos[1] + reach
@@ -143,28 +145,33 @@ def state_to_features(game_state: dict) -> np.array:
 
             # compute the explosion range
             for j in range_bomb:
-                if wall_crates[x_bomb + j, y_bomb] in {1, -1} or explosion_coins[x_bomb, y_bomb - j] in {1, -1} or bomb_opponents in {1}:
+                if j + x_bomb > 6: break
+                if wall_crates[x_bomb + j, y_bomb] in {1, -1}:
                     break
                 else:
                     bomb_opponents[x_bomb + j, y_bomb] = -1
 
             for j in range_bomb:
-                if wall_crates[x_bomb - j, y_bomb] in {1, -1} or explosion_coins[x_bomb, y_bomb - j] in {1, -1} or bomb_opponents in {1}:
+                if j - x_bomb < 0: break
+                if wall_crates[x_bomb - j, y_bomb] in {1, -1}:
                     break
                 else:
                     bomb_opponents[x_bomb - j, y_bomb] = -1
 
             for j in range_bomb:
-                if wall_crates[x_bomb, y_bomb + j] in {1, -1} or explosion_coins[x_bomb, y_bomb - j] in {1, -1} or bomb_opponents in {1}:
+                if j + y_bomb > 6: break
+                if wall_crates[x_bomb, y_bomb + j] in {1, -1}:
                     break
                 else:
                     bomb_opponents[x_bomb, y_bomb + j] = -1
 
             for j in range_bomb:
-                if wall_crates[x_bomb, y_bomb - j] in {1, -1} or explosion_coins[x_bomb, y_bomb - j] in {1, -1} or bomb_opponents in {1}:
+                if j - y_bomb < 0: break
+                if wall_crates[x_bomb, y_bomb - j] in {1, -1}:
                     break
                 else:
                     bomb_opponents[x_bomb, y_bomb - j] = -1
+        else: next
 
     # --- scaled down vision outside reach ---------------------------------------------------------------------------
     outside_map = np.zeros((4, 4))  # coins, crates, bombs, other agents
@@ -173,25 +180,30 @@ def state_to_features(game_state: dict) -> np.array:
         for j in range(0, field.shape[1]):
 
             field_value = field[i, j]
-            if field_value == 0:  # For now we only care about coins
+            if field_value == 0:
                 next
+            else:
+                # coins = 3, crates = 2, bombs and explosions = -1 -> make it to 1, other agents >= 5 -> make it to 0 (index)
+                if field_value == -1:
+                    field_value = 1
+                elif field_value >= 5:
+                    field_value = 0
 
-            # coins = 3, crates = 2, bombs and explosions = -1 -> make it to 1, other agents >= 5 -> make it to 0 (index)
-            if field_value == -1:
-                field_value = 1
-            elif field_value >= 5:
-                field_value = 0
+                if j < top:
+                    outside_map[0, field_value] = 1
+                if j > bottom:
+                    outside_map[1, field_value] = 1
+                if i < left:
+                    outside_map[2, field_value] = 1
+                if i > right:
+                    outside_map[3, field_value] = 1
 
-            if j < top:
-                outside_map[0, field_value] = 1
-            if j > bottom:
-                outside_map[1, field_value] = 1
-            if i < left:  # We're on the left side
-                outside_map[2, field_value] = 1
-            if i > right:
-                outside_map[3, field_value] = 1
-
-    features = list(my_pos) + wall_crates.flatten().tolist() + explosion_coins.flatten().tolist() \
+    '''print(wall_crates)
+    print(explosion_coins)
+    print(bomb_opponents)
+    print()
+    '''
+    features = wall_crates.flatten().tolist() + explosion_coins.flatten().tolist() \
                 + bomb_opponents.flatten().tolist() + outside_map.ravel().tolist()
 
     return features

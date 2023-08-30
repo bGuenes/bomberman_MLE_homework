@@ -55,9 +55,9 @@ class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 128)
-        self.layer2 = nn.Linear(128, 50)
-        self.layer3 = nn.Linear(50, n_actions)
+        self.layer1 = nn.Linear(n_observations, 100)
+        self.layer2 = nn.Linear(100, 70)
+        self.layer3 = nn.Linear(70, n_actions)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -75,7 +75,7 @@ def setup_training(self):
 
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
-    n_observations = 165  # length of feature
+    n_observations = 163  # length of feature
     n_actions = 6  # No bombing or waiting for now!
 
     if self.train and os.path.isfile("my-saved-model.pt"):
@@ -214,11 +214,11 @@ def reward_from_events(self, events: List[str], closer: int) -> int:
         GETTING_CLOSER: 5/closer,
         GETTING_AWAY: 5/closer,
         e.INVALID_ACTION: -5,  # don't make invalid actions!
-        e.CRATE_DESTROYED: 2,
+        e.CRATE_DESTROYED: 8,
         e.COIN_FOUND: 5,
-        e.GOT_KILLED: -30,
+        e.GOT_KILLED: -20,
         e.KILLED_OPPONENT: 10,
-        e.KILLED_SELF: -100,
+        e.KILLED_SELF: -40,
         e.SURVIVED_ROUND: 5,
         e.BOMB_DROPPED: 2,
         e.WAITED: -1
