@@ -56,7 +56,7 @@ def act(self, game_state: dict) -> str:
         eps_decay = 1000
         round = 1
         sample = random.random()
-        eps_threshold = 0.1  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
+        eps_threshold = 0  #eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
             round += 1
@@ -146,28 +146,28 @@ def state_to_features(game_state: dict) -> np.array:
             # compute the explosion range
             for j in range_bomb:
                 if j + x_bomb > 6: break
-                if wall_crates[x_bomb + j, y_bomb] in {1, -1}:
+                if wall_crates[x_bomb + j, y_bomb] in {-1}:
                     break
                 else:
                     bomb_opponents[x_bomb + j, y_bomb] = -1
 
             for j in range_bomb:
                 if j - x_bomb < 0: break
-                if wall_crates[x_bomb - j, y_bomb] in {1, -1}:
+                if wall_crates[x_bomb - j, y_bomb] in {-1}:
                     break
                 else:
                     bomb_opponents[x_bomb - j, y_bomb] = -1
 
             for j in range_bomb:
                 if j + y_bomb > 6: break
-                if wall_crates[x_bomb, y_bomb + j] in {1, -1}:
+                if wall_crates[x_bomb, y_bomb + j] in {-1}:
                     break
                 else:
                     bomb_opponents[x_bomb, y_bomb + j] = -1
 
             for j in range_bomb:
                 if j - y_bomb < 0: break
-                if wall_crates[x_bomb, y_bomb - j] in {1, -1}:
+                if wall_crates[x_bomb, y_bomb - j] in {-1}:
                     break
                 else:
                     bomb_opponents[x_bomb, y_bomb - j] = -1
