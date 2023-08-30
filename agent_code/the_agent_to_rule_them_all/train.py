@@ -192,7 +192,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
         target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
     self.target_net.load_state_dict(target_net_state_dict)
 
-    print(torch.sum(reward_batch))
+    #print(torch.sum(reward_batch))
     #if "COIN_COLLECTED" in events:
     #    print("COIN COLLECTED")
 
@@ -217,7 +217,7 @@ def reward_from_events(self, events: List[str], closer: int) -> int:
         e.CRATE_DESTROYED: 8,
         e.COIN_FOUND: 5,
         e.GOT_KILLED: -20,
-        e.KILLED_OPPONENT: 10,
+        e.KILLED_OPPONENT: 50,
         e.KILLED_SELF: -40,
         e.SURVIVED_ROUND: 5,
         e.BOMB_DROPPED: 2,
