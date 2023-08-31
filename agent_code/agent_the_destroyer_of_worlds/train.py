@@ -29,6 +29,8 @@ GETTING_CLOSER = "GETTING_CLOSER"
 GETTING_AWAY = "GETTING_AWAY"
 BOMB_RADIUS = "BOMB_RADIUS"
 BOMB_CRATES = "BOMB_CRATES"
+BOMB_ESCAPE_P = "BOMB_ESCAPE_P"
+BOMB_ESCAPE_M = "BOMB_ESCAPE_M"
 
 # params
 BATCH_SIZE = 200
@@ -150,6 +152,12 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     elif closer < 0:
         events.append(GETTING_AWAY)
 
+    escape = deadly_bomb(old_game_state, new_game_state, events)
+    if escape == 1:
+        events.append("BOMB_ESCAPE_P")
+    if escape == -1:
+        events.append("BOMB_ESCAPE_M")
+
     radius = bomb_radius(old_game_state, new_game_state)
     events.append(BOMB_RADIUS)
 
@@ -265,10 +273,11 @@ def reward_from_events(self, events: List[str], closer: int, crates: int, radius
         e.KILLED_OPPONENT: 50,
         e.KILLED_SELF: -40,
         e.SURVIVED_ROUND: 5,
-        e.BOMB_DROPPED: 2,
         e.WAITED: -1,
         BOMB_CRATES: crates,
-        BOMB_RADIUS: radius
+        BOMB_RADIUS: radius,
+        BOMB_ESCAPE_P: 2,
+        BOMB_ESCAPE_M: -10,
     }
     reward_sum = 0
     for event in events:
@@ -278,7 +287,9 @@ def reward_from_events(self, events: List[str], closer: int, crates: int, radius
     self.logger.info(f"Awarded {reward_sum} for events {', '.join(events)}")
     return reward_sum
 
+
 # --- reward events ---------------------------------------------------------------------------------------------------
+
 
 def getting_closer(old_game_state: dict, new_game_state: dict):
     coins = old_game_state["coins"]
@@ -331,6 +342,7 @@ def bomb_radius(old_game_state: dict, new_game_state: dict):
 
     return radius
 
+
 def bomb_crates(old_game_state, new_game_state, events):
 
     if "BOMB_DROPPED" in events:
@@ -339,15 +351,73 @@ def bomb_crates(old_game_state, new_game_state, events):
 
         crates = 0
         for i in range(1, 4):
-            if not 0 < i < field.shape[0] and field[my_pos[0] + i, my_pos[1]] == 1:
-                crates += 1
-            if not 0 < i < field.shape[1] and field[my_pos[0], my_pos[1] + i] == 1:
-                crates += 1
-            if not 0 < i < field.shape[0] and field[my_pos[0] - i, my_pos[1]] == 1:
-                crates += 1
-            if not 0 < i < field.shape[1] and field[my_pos[0], my_pos[1] - i] == 1:
-                crates += 1
+            if 0 <= my_pos[0] - i and my_pos[0] + i < field.shape[0]:
+                if field[my_pos[0] + i, my_pos[1]] == 1:
+                    crates += 1
+                if field[my_pos[0] - i, my_pos[1]] == 1:
+                    crates += 1
+            if 0 <= my_pos[1] - i and my_pos[1] + i < field.shape[1]:
+                if field[my_pos[0], my_pos[1] + i] == 1:
+                    crates += 1
+                if field[my_pos[0], my_pos[1] - i] == 1:
+                    crates += 1
     else:
         crates = -1
 
     return crates * 5
+
+
+def deadly_bomb(old_game_state, new_game_state, events):
+    escape = 0
+    if "BOMB_DROPPED" in events:
+        my_pos = old_game_state["self"][3]
+        field = old_game_state["field"]
+        bomb_range = [4, 3, 2, 1]
+
+        escape_left = False
+        escape_right = False
+        escape_top = False
+        escape_bottom = False
+
+        for i in bomb_range:
+            if i == 4:
+                if 0 <= my_pos[0] - i and my_pos[0] + i < field.shape[0]:
+                    if field[my_pos[0] + i, my_pos[1]] == 0:
+                        escape_right = True
+                    if field[my_pos[0] - i, my_pos[1]] == 0:
+                        escape_left = True
+                if 0 <= my_pos[1] - i and my_pos[1] + i < field.shape[1]:
+                    if field[my_pos[0], my_pos[1] + i] == 0:
+                        escape_top = True
+                    if field[my_pos[0], my_pos[1] - i] == 0:
+                        escape_left = True
+                next
+
+            if 0 <= my_pos[0] - i and my_pos[0] + i < field.shape[0]:
+                if field[my_pos[0]+i, my_pos[1]+1] == 0 or field[my_pos[0]+i, my_pos[1]-1] == 0:
+                    escape_right = True
+                elif field[my_pos[0]+i, my_pos[1]] != 0:
+                    escape_right = False
+
+                if field[my_pos[0] - i, my_pos[1] + 1] == 0 or field[my_pos[0] - i, my_pos[1] - 1] == 0:
+                    escape_left = True
+                elif field[my_pos[0] - i, my_pos[1]] != 0:
+                    escape_left = False
+
+            if 0 <= my_pos[1] - i and my_pos[1] + i < field.shape[1]:
+                if field[my_pos[0]-1, my_pos[1]+i] == 0 or field[my_pos[0]+1, my_pos[1]+i] == 0:
+                    escape_top = True
+                elif field[my_pos[0], my_pos[1]+i] != 0:
+                    escape_top = False
+
+                if field[my_pos[0]-1, my_pos[1]-i] == 0 or field[my_pos[0]+1, my_pos[1]-i] == 0:
+                    escape_bottom = True
+                elif field[my_pos[0], my_pos[1]-i] != 0:
+                    escape_bottom = False
+
+        if any((escape_bottom, escape_left, escape_right, escape_top)):
+            escape = 1
+        else:
+            escape = -1
+
+    return escape
