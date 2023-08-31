@@ -28,6 +28,7 @@ RECORD_ENEMY_TRANSITIONS = 1.0  # record enemy transitions with probability ...
 GETTING_CLOSER = "GETTING_CLOSER"
 GETTING_AWAY = "GETTING_AWAY"
 BOMB_RADIUS = "BOMB_RADIUS"
+BOMB_CRATES = "BOMB_CRATES"
 
 # params
 BATCH_SIZE = 200
@@ -149,8 +150,11 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     elif closer < 0:
         events.append(GETTING_AWAY)
 
-    #bomb_reward = bomb_radius(old_game_state, new_game_state)
-    #events.append(BOMB_RADIUS)
+    radius = bomb_radius(old_game_state, new_game_state)
+    events.append(BOMB_RADIUS)
+
+    crates = bomb_crates(old_game_state, new_game_state, events)
+    events.append(BOMB_CRATES)
 
     #print(events)
 
@@ -159,7 +163,7 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
         state_to_features(old_game_state),
         torch.tensor([[ACTIONS.index(self_action)]]), 
         state_to_features(new_game_state),
-        torch.tensor([reward_from_events(self, events, closer)])
+        torch.tensor([reward_from_events(self, events, closer, crates, radius)])
         )
 
     self.last_state = new_game_state
@@ -182,7 +186,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
         state_to_features(self.last_state),
         torch.tensor([[ACTIONS.index(last_action)]]),
         state_to_features(last_game_state),
-        torch.tensor([reward_from_events(self, events, 1)])
+        torch.tensor([reward_from_events(self, events, 1, 1, 1)])
     )
 
 
@@ -242,7 +246,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
         pickle.dump(self.policy_net, file)
 
 
-def reward_from_events(self, events: List[str], closer: int) -> int:
+def reward_from_events(self, events: List[str], closer: int, crates: int, radius: int) -> int:
     """
     *This is not a required function, but an idea to structure your code.*
 
@@ -262,7 +266,9 @@ def reward_from_events(self, events: List[str], closer: int) -> int:
         e.KILLED_SELF: -40,
         e.SURVIVED_ROUND: 5,
         e.BOMB_DROPPED: 2,
-        e.WAITED: -1
+        e.WAITED: -1,
+        BOMB_CRATES: crates,
+        BOMB_RADIUS: radius
     }
     reward_sum = 0
     for event in events:
@@ -272,6 +278,7 @@ def reward_from_events(self, events: List[str], closer: int) -> int:
     self.logger.info(f"Awarded {reward_sum} for events {', '.join(events)}")
     return reward_sum
 
+# --- reward events ---------------------------------------------------------------------------------------------------
 
 def getting_closer(old_game_state: dict, new_game_state: dict):
     coins = old_game_state["coins"]
@@ -301,31 +308,46 @@ def getting_closer(old_game_state: dict, new_game_state: dict):
         else:
             return 10
 
-'''
+
 def bomb_radius(old_game_state: dict, new_game_state: dict):
     # check if agent is in the bombing radius
-    old_feature_map = state_to_reward(old_game_state)
-    new_feature_map = state_to_reward(new_game_state)
+    old_bombs = old_game_state["bombs"]
 
     old_pos = old_game_state["self"][3]
     new_pos = new_game_state["self"][3]
 
-    if old_feature_map[old_pos] == -1 or old_feature_map[old_pos] == -2:
-        old_bombing_range = True
-    else:
-        old_bombing_range = False
+    radius = 0
+    for i in old_bombs:
+        old_dis_x = abs(old_pos[0] - i[0][0])
+        old_dis_y = abs(old_pos[1] - i[0][1])
+        new_dis_x = abs(new_pos[0] - i[0][0])
+        new_dis_y = abs(new_pos[1] - i[0][1])
 
-    if new_feature_map[new_pos] == -1 or new_feature_map[new_pos] == -2:
-        new_bombing_range = True
-    else:
-        new_bombing_range = False
+        if old_dis_x <= 3 and old_dis_y <= 3:
+            if new_dis_x > old_dis_x or new_dis_y > old_dis_y:
+                radius = 5
+            if new_dis_x <= old_dis_x or new_dis_y <= old_dis_y:
+                radius = -5
 
-    if old_bombing_range and new_bombing_range:
-        return -5
-    elif old_bombing_range and not new_bombing_range:
-        return 10
-    elif not old_bombing_range and new_bombing_range:
-        return -10
-    elif not old_bombing_range and not new_bombing_range:
-        return 1
-'''
+    return radius
+
+def bomb_crates(old_game_state, new_game_state, events):
+
+    if "BOMB_DROPPED" in events:
+        my_pos = old_game_state["self"][3]
+        field = old_game_state["field"]
+
+        crates = 0
+        for i in range(1, 4):
+            if not 0 < i < field.shape[0] and field[my_pos[0] + i, my_pos[1]] == 1:
+                crates += 1
+            if not 0 < i < field.shape[1] and field[my_pos[0], my_pos[1] + i] == 1:
+                crates += 1
+            if not 0 < i < field.shape[0] and field[my_pos[0] - i, my_pos[1]] == 1:
+                crates += 1
+            if not 0 < i < field.shape[1] and field[my_pos[0], my_pos[1] - i] == 1:
+                crates += 1
+    else:
+        crates = -1
+
+    return crates * 5
