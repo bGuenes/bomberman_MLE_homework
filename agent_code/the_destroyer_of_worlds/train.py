@@ -55,16 +55,48 @@ class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 100)
+        '''self.layer1 = nn.Linear(n_observations, 100)
         self.layer2 = nn.Linear(100, 70)
-        self.layer3 = nn.Linear(70, n_actions)
+        self.layer3 = nn.Linear(70, n_actions)'''
+
+        self.input1 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input2 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input3 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input4 = nn.Linear(16, 12)
+
+        self.hidden11 = nn.Linear(25, 18)
+        self.hidden12 = nn.Linear(25, 18)
+        self.hidden13 = nn.Linear(25, 18)
+        self.hidden14 = nn.Linear(12, 6)
+
+        self.hidden2 = nn.Linear(60, 30)
+
+        self.output = nn.Linear(30, n_actions)
+
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, x):
-        x = F.relu(self.layer1(x))
+    def forward(self, x1, x2, x3, x4):
+        '''x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
-        return self.layer3(x)
+        return self.layer3(x)'''
+
+        x1 = F.relu(self.input1(x1))
+        x2 = F.relu(self.input2(x2))
+        x3 = F.relu(self.input3(x3))
+        x4 = F.relu(self.input4(x4))
+
+        x1 = F.relu(self.hidden11(x1.flatten()))
+        x2 = F.relu(self.hidden12(x2.flatten()))
+        x3 = F.relu(self.hidden13(x3.flatten()))
+        x4 = F.relu(self.hidden14(x4)).flatten()
+
+        x = torch.cat((x1, x2, x3, x4))
+        x = F.relu(self.hidden2(x))
+
+        x = self.output(x)
+
+        return x
 
 
 def setup_training(self):
@@ -124,9 +156,9 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
 
     # state_to_features is defined in callbacks.py
     self.memory.push(
-        torch.tensor(state_to_features(old_game_state)).unsqueeze(0),
+        state_to_features(old_game_state),
         torch.tensor([[ACTIONS.index(self_action)]]), 
-        torch.tensor(state_to_features(new_game_state)).unsqueeze(0), 
+        state_to_features(new_game_state),
         torch.tensor([reward_from_events(self, events, closer)])
         )
 
@@ -147,11 +179,12 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     """
     # safe the last step of the round
     self.memory.push(
-        torch.tensor(state_to_features(self.last_state)).unsqueeze(0),
+        state_to_features(self.last_state),
         torch.tensor([[ACTIONS.index(last_action)]]),
-        torch.tensor(state_to_features(last_game_state)).unsqueeze(0),
+        state_to_features(last_game_state),
         torch.tensor([reward_from_events(self, events, 1)])
     )
+
 
     self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')
     
@@ -159,18 +192,27 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     BATCH_SIZE_CORRECTED = min(BATCH_SIZE, len(self.memory))  # if memory is not big enough for batch size
     transitions = self.memory.sample(BATCH_SIZE_CORRECTED)  # Will need to play with the batch size!
     batch = Transition(*zip(*transitions))
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                          batch.next_state)), dtype=torch.bool)
-    non_final_next_states = torch.cat([s for s in batch.next_state
-                                                if s is not None])
+    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool)
 
-    state_batch = torch.cat(batch.state)
     action_batch = torch.cat(batch.action)
     reward_batch = torch.cat(batch.reward)
-    state_action_values = self.policy_net(state_batch).gather(1, action_batch)
-    next_state_values = torch.zeros(BATCH_SIZE_CORRECTED)
-    with torch.no_grad():
-        next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0]
+    state_action_values = torch.zeros((BATCH_SIZE_CORRECTED, 6))
+    next_state_values = torch.zeros(BATCH_SIZE_CORRECTED, 6)
+
+    i = 0
+    for s in batch.state:
+        state_action_values[i] = self.policy_net(s[0], s[1], s[2], s[3])
+        i += 1
+    state_action_values = state_action_values.gather(1, action_batch)
+
+    i = 0
+    for s in batch.next_state:
+        with torch.no_grad():
+            if non_final_mask[i]:
+                next_state_values[i] = self.target_net(s[0], s[1], s[2], s[3])
+        i += 1
+    next_state_values = next_state_values.max(1)[0]
+
     # Compute the expected Q values
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 

@@ -15,7 +15,7 @@ SCENARIOS = {
     },
     "coin-heaven": {
         "CRATE_DENSITY": 0,
-        "COIN_COUNT": 10
+        "COIN_COUNT": 20
     },
     "loot-crate": { 
         "CRATE_DENSITY": 0.5,
@@ -32,7 +32,7 @@ SCENARIOS = {
 MAX_AGENTS = 4
 
 # Round properties
-MAX_STEPS = 100
+MAX_STEPS = 50
 
 # GUI properties
 GRID_SIZE = 30
