@@ -15,6 +15,9 @@ import random
 import os
 import numpy as np
 
+# with gpu
+device = torch. device("cuda" if torch.cuda.is_available() else "cpu")
+
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 # This is only an example!
 Transition = namedtuple('Transition',
@@ -86,9 +89,9 @@ def setup_training(self):
             self.policy_net = pickle.load(file)
 
     else:
-        self.policy_net = DQN(n_observations, n_actions)
+        self.policy_net = DQN(n_observations, n_actions).to(device)
 
-    self.target_net = DQN(n_observations, n_actions)
+    self.target_net = DQN(n_observations, n_actions).to(device)
     self.target_net.load_state_dict(self.policy_net.state_dict())
 
     self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=LR, amsgrad=True)

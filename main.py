@@ -9,6 +9,8 @@ from environment import BombeRLeWorld, GUI
 from fallbacks import pygame, LOADED_PYGAME
 from replay import ReplayWorld
 
+import cProfile
+
 ESCAPE_KEYS = (pygame.K_q, pygame.K_ESCAPE)
 
 
@@ -181,4 +183,15 @@ def main(argv = None):
 
 
 if __name__ == '__main__':
+
+    import cProfile
+    from pstats import Stats
+
+    pr = cProfile.Profile()
+    pr.enable()
+
     main()
+
+    pr.disable()
+    stats = Stats(pr)
+    stats.sort_stats('cumtime').print_stats(15)
