@@ -282,7 +282,7 @@ def reward_from_events(self, events: List[str], closer: int, crates: int, radius
         BOMB_CRATES: crates,
         BOMB_RADIUS: radius,
         BOMB_ESCAPE_P: 2,
-        BOMB_ESCAPE_M: -10,
+        BOMB_ESCAPE_M: -100,
     }
     reward_sum = 0
     for event in events:
