@@ -194,4 +194,4 @@ if __name__ == '__main__':
 
     pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('cumtime').print_stats(15)
+    stats.sort_stats('cumtime').print_stats(30)

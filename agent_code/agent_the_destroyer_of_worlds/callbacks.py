@@ -6,6 +6,7 @@ import torch
 
 import numpy as np
 import math as m
+from operator import itemgetter
 
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 
@@ -99,6 +100,7 @@ def state_to_features(game_state: dict) -> np.array:
     vision_coordinates = vision_coordinates.T
     vision_coordinates = vision_coordinates.reshape(((reach*2+1)**2, 2))
 
+
     # --- map with walls (-1), free (0) and crates (1) ---------------------------------------------------------------
     wall_crates = np.zeros((reach * 2 + 1, reach * 2 + 1)) - 1  # outside of game also -1
     for coord in vision_coordinates:
@@ -113,26 +115,38 @@ def state_to_features(game_state: dict) -> np.array:
     explosion_coins = np.zeros((reach * 2 + 1, reach * 2 + 1))
 
     explosion_coord = np.transpose((explosion_map > 0).nonzero())
-    for expl in explosion_coord:
-        if any(sum(expl == i) == 2 for i in vision_coordinates):
-            x_expl = expl[0] - my_pos[0] + reach
-            y_expl = expl[1] - my_pos[1] + reach
-            explosion_coins[x_expl, y_expl] = -1
+    vision_coordinates2 = vision_coordinates[:, np.newaxis, :]
 
-    for coin in coins:
-        if any(sum(np.asarray(coin) == i) == 2 for i in vision_coordinates):
-            x_coin = coin[0] - my_pos[0] + reach
-            y_coin = coin[1] - my_pos[1] + reach
-            explosion_coins[x_coin, y_coin] = 1
+    coins2 = np.asarray(coins)
+    if len(coins2) > 0:
+        coins2 = coins2[np.newaxis, :, :]
+        mask = np.all(vision_coordinates2 == coins2, axis=2)
+        mask = np.where(mask.any(axis=1))
+        if len(mask) > 0:
+            visable = vision_coordinates2[mask] - my_pos + reach
+            explosion_coins[tuple(visable.T)] = 1
+
+    explosion_coord2 = np.asarray(explosion_coord)
+    if len(explosion_coord2) > 0:
+        explosion_coord2 = explosion_coord2[np.newaxis, :, :]
+        mask = np.all(vision_coordinates2 == explosion_coord2, axis=2)
+        mask = np.where(mask.any(axis=1))
+        if len(mask) > 0:
+            visable = vision_coordinates2[mask] - my_pos + reach
+            explosion_coins[tuple(visable.T)] = -1
 
     # --- map with bomb range (-1), free (0) and opponents (1) --------------------------------------------------------
     bomb_opponents = np.zeros((reach * 2 + 1, reach * 2 + 1))
 
-    for enemy in others:
-        if any(sum(enemy[3] == i) == 2 for i in vision_coordinates):
-            x_enemy = enemy[3][0] - my_pos[0] + reach
-            y_enemy = enemy[3][1] - my_pos[1] + reach
-            bomb_opponents[x_enemy, y_enemy] = 1
+    if len(others) > 0:
+        others2 = np.array(list(map(itemgetter(3), others)))
+        if len(others2) > 0:
+            others2 = others2[np.newaxis, :, :]
+            mask = np.all(vision_coordinates2 == others2, axis=2)
+            mask = np.where(mask.any(axis=1))
+            if len(mask) > 0:
+                visable = vision_coordinates2[mask] - my_pos + reach
+                bomb_opponents[tuple(visable.T)] = 1
 
     for bomb in bombs:
         if any(sum(bomb[0] == i) == 2 for i in vision_coordinates):
@@ -198,14 +212,9 @@ def state_to_features(game_state: dict) -> np.array:
                 if i > right:
                     outside_map[3, field_value] = 1
 
-    '''print(wall_crates)
-    print(explosion_coins)
-    print(bomb_opponents)
-    print()
-    '''
-    wall_crates = torch.tensor([np.float32(wall_crates)])
-    explosion_coins = torch.tensor([np.float32(explosion_coins)])
-    bomb_opponents = torch.tensor([np.float32(bomb_opponents)])
+    wall_crates = torch.tensor([wall_crates.tolist()])
+    explosion_coins = torch.tensor([explosion_coins.tolist()])
+    bomb_opponents = torch.tensor([bomb_opponents.tolist()])
     outside_map = torch.tensor([outside_map.ravel().tolist()])
 
     return wall_crates, explosion_coins, bomb_opponents, outside_map
