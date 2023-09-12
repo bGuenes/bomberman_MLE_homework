@@ -25,6 +25,12 @@ def setup(self):
 
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
+    global device
+    if torch.backends.mps.is_available():
+        device = torch.device("cpu")  # add mps if on mac
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device: " + str(device))
 
     if self.train and not os.path.isfile("my-saved-model.pt"):
         print("Setting up model from scratch.")
@@ -69,7 +75,7 @@ def act(self, game_state: dict) -> str:
         else:
             round += 1
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.2, .2, .2, .2, .1, .1])]],
-                                       dtype=torch.long)
+                                       dtype=torch.long, device=device)
     else:
         action_done = torch.argmax(self.model(x1, x2, x3, x4))
 
@@ -212,9 +218,9 @@ def state_to_features(game_state: dict) -> np.array:
                 if i > right:
                     outside_map[3, field_value] = 1
 
-    wall_crates = torch.tensor([wall_crates.tolist()])
-    explosion_coins = torch.tensor([explosion_coins.tolist()])
-    bomb_opponents = torch.tensor([bomb_opponents.tolist()])
-    outside_map = torch.tensor([outside_map.ravel().tolist()])
+    wall_crates = torch.tensor([wall_crates.tolist()], device=device)
+    explosion_coins = torch.tensor([explosion_coins.tolist()], device=device)
+    bomb_opponents = torch.tensor([bomb_opponents.tolist()], device=device)
+    outside_map = torch.tensor([outside_map.ravel().tolist()], device=device)
 
     return wall_crates, explosion_coins, bomb_opponents, outside_map

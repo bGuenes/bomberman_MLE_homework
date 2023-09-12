@@ -15,11 +15,6 @@ import random
 import os
 import numpy as np
 
-# with gpu
-device = torch. device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
-
-
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 # This is only an example!
 Transition = namedtuple('Transition',
@@ -85,9 +80,6 @@ class DQN(nn.Module):
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
     def forward(self, x1, x2, x3, x4):
-        '''x = F.relu(self.layer1(x))
-        x = F.relu(self.layer2(x))
-        return self.layer3(x)'''
 
         x1 = F.relu(self.input1(x1))
         x2 = F.relu(self.input2(x2))
@@ -118,9 +110,16 @@ def setup_training(self):
     n_observations = 163  # length of feature
     n_actions = 6  # No bombing or waiting for now!
 
+    # setup device
+    global device
+    if torch.backends.mps.is_available():
+        device = torch.device("cpu")  # add mps if on mac
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     if self.train and os.path.isfile("my-saved-model.pt"):
         with open("my-saved-model.pt", "rb") as file:
-            self.policy_net = pickle.load(file)
+            self.policy_net = pickle.load(file).to(device)
 
     else:
         self.policy_net = DQN(n_observations, n_actions).to(device)
@@ -174,9 +173,9 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     # state_to_features is defined in callbacks.py
     self.memory.push(
         state_to_features(old_game_state),
-        torch.tensor([[ACTIONS.index(self_action)]]), 
+        torch.tensor([[ACTIONS.index(self_action)]], device=device),
         state_to_features(new_game_state),
-        torch.tensor([reward_from_events(self, events, closer, crates, radius)])
+        torch.tensor([reward_from_events(self, events, closer, crates, radius)]).type('torch.FloatTensor').to(device)
         )
 
     self.last_state = new_game_state
@@ -197,9 +196,9 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     # safe the last step of the round
     self.memory.push(
         state_to_features(self.last_state),
-        torch.tensor([[ACTIONS.index(last_action)]]),
+        torch.tensor([[ACTIONS.index(last_action)]], device=device),
         state_to_features(last_game_state),
-        torch.tensor([reward_from_events(self, events, 1, 1, 1)])
+        torch.tensor([reward_from_events(self, events, 1, 1, 1)], device=device)
     )
 
 
@@ -209,12 +208,12 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     BATCH_SIZE_CORRECTED = min(BATCH_SIZE, len(self.memory))  # if memory is not big enough for batch size
     transitions = self.memory.sample(BATCH_SIZE_CORRECTED)  # Will need to play with the batch size!
     batch = Transition(*zip(*transitions))
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool)
+    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool, device=device)
 
-    action_batch = torch.cat(batch.action)
-    reward_batch = torch.cat(batch.reward)
-    state_action_values = torch.zeros((BATCH_SIZE_CORRECTED, 6))
-    next_state_values = torch.zeros(BATCH_SIZE_CORRECTED, 6)
+    action_batch = torch.cat(batch.action).to(device)
+    reward_batch = torch.cat(batch.reward).to(device)
+    state_action_values = torch.zeros((BATCH_SIZE_CORRECTED, 6), device=device)
+    next_state_values = torch.zeros(BATCH_SIZE_CORRECTED, 6, device=device)
 
     i = 0
     for s in batch.state:
@@ -427,5 +426,3 @@ def deadly_bomb(old_game_state, new_game_state, events):
 
     return escape
 
-
-#cProfile.run('deadly_bomb(old_game_state, new_game_state, events)')
