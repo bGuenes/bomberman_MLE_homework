@@ -56,7 +56,7 @@ class ReplayMemory(object):
 # setup NN
 class DQN(nn.Module):
 
-    def __init__(self, n_observations, n_actions):
+    def __init__(self, n_actions):
         super(DQN, self).__init__()
         '''self.layer1 = nn.Linear(n_observations, 100)
         self.layer2 = nn.Linear(100, 70)
@@ -72,6 +72,11 @@ class DQN(nn.Module):
         self.hidden13 = nn.Linear(25, 18)
         self.hidden14 = nn.Linear(12, 6)
 
+        self.batch1 = nn.BatchNorm1d(18)
+        self.batch2 = nn.BatchNorm1d(18)
+        self.batch3 = nn.BatchNorm1d(18)
+        self.batch4 = nn.BatchNorm1d(6)
+
         self.hidden2 = nn.Linear(60, 30)
 
         self.output = nn.Linear(30, n_actions)
@@ -86,12 +91,20 @@ class DQN(nn.Module):
         x3 = F.relu(self.input3(x3))
         x4 = F.relu(self.input4(x4))
 
-        x1 = F.relu(self.hidden11(x1.flatten()))
-        x2 = F.relu(self.hidden12(x2.flatten()))
-        x3 = F.relu(self.hidden13(x3.flatten()))
-        x4 = F.relu(self.hidden14(x4)).flatten()
+        x1 = F.relu(self.hidden11(x1.view(x1.size(0), -1)))
+        x2 = F.relu(self.hidden12(x2.view(x2.size(0), -1)))
+        x3 = F.relu(self.hidden13(x3.view(x3.size(0), -1)))
+        x4 = F.relu(self.hidden14(x4.view(x4.size(0), -1)))
 
-        x = torch.cat((x1, x2, x3, x4))
+        #print(x1.size()[0])
+        #print(x4.size())
+        if x1.size()[0] > 1:
+            x1 = self.batch1(x1)
+            x2 = self.batch2(x2)
+            x3 = self.batch3(x3)
+            x4 = self.batch4(x4)
+
+        x = torch.cat((x1, x2, x3, x4), dim=1)
         x = F.relu(self.hidden2(x))
 
         x = self.output(x)
@@ -107,7 +120,7 @@ def setup_training(self):
 
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
-    n_observations = 163  # length of feature
+    #n_observations = 163  # length of feature
     n_actions = 6  # No bombing or waiting for now!
 
     # setup device
@@ -122,9 +135,9 @@ def setup_training(self):
             self.policy_net = pickle.load(file).to(device)
 
     else:
-        self.policy_net = DQN(n_observations, n_actions).to(device)
+        self.policy_net = DQN(n_actions).to(device)
 
-    self.target_net = DQN(n_observations, n_actions).to(device)
+    self.target_net = DQN(n_actions).to(device)
     self.target_net.load_state_dict(self.policy_net.state_dict())
 
     self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=LR, amsgrad=True)
@@ -212,21 +225,24 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
 
     action_batch = torch.cat(batch.action).to(device)
     reward_batch = torch.cat(batch.reward).to(device)
-    state_action_values = torch.zeros((BATCH_SIZE_CORRECTED, 6), device=device)
-    next_state_values = torch.zeros(BATCH_SIZE_CORRECTED, 6, device=device)
 
-    i = 0
-    for s in batch.state:
-        state_action_values[i] = self.policy_net(s[0], s[1], s[2], s[3])
-        i += 1
+    states = list(zip(*batch.state))
+
+    state_action_values = self.policy_net(torch.stack(states[0]), torch.stack(states[1]), torch.stack(states[2]), torch.stack(states[3])).to(device)
     state_action_values = state_action_values.gather(1, action_batch)
 
-    i = 0
-    for s in batch.next_state:
+    input1 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 7, 7), device = device)
+    input2 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 7, 7), device = device)
+    input3 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 7, 7), device = device)
+    input4 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 16), device = device)
+    for i, s in enumerate(batch.next_state):
         with torch.no_grad():
             if non_final_mask[i]:
-                next_state_values[i] = self.target_net(s[0], s[1], s[2], s[3])
-        i += 1
+                input1[i] = s[0]
+                input2[i] = s[1]
+                input3[i] = s[2]
+                input4[i] = s[3]
+    next_state_values = self.target_net(input1, input2, input3, input4).to(device)
     next_state_values = next_state_values.max(1)[0]
 
     # Compute the expected Q values
