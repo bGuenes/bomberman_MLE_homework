@@ -11,6 +11,9 @@ from torch import nn
 import torch.optim as optim
 import torch.nn.functional as F
 
+import matplotlib.pyplot as plt
+import time
+
 import random
 import os
 import numpy as np
@@ -42,6 +45,9 @@ class ReplayMemory(object):
 
     def __init__(self, capacity):
         self.memory = deque([], maxlen=capacity)
+        self.rewards = [0]
+        self.scores = [0]
+        self.rounds = 0
 
     def push(self, *args):
         """Save a transition"""
@@ -49,6 +55,12 @@ class ReplayMemory(object):
 
     def sample(self, batch_size):
         return random.sample(self.memory, batch_size)
+    
+    def save_reward(self, reward):
+        self.rewards.append(reward)
+    
+    def save_score(self, score):
+        self.scores.append(score)
 
     def __len__(self):
         return len(self.memory)
@@ -72,10 +84,10 @@ class DQN(nn.Module):
         self.hidden13 = nn.Linear(25, 18)
         self.hidden14 = nn.Linear(12, 6)
 
-        self.batch1 = nn.BatchNorm1d(18)
-        self.batch2 = nn.BatchNorm1d(18)
-        self.batch3 = nn.BatchNorm1d(18)
-        self.batch4 = nn.BatchNorm1d(6)
+        #self.batch1 = nn.BatchNorm1d(18)
+        #self.batch2 = nn.BatchNorm1d(18)
+        #self.batch3 = nn.BatchNorm1d(18)
+        #self.batch4 = nn.BatchNorm1d(6)
 
         self.hidden2 = nn.Linear(60, 30)
 
@@ -98,11 +110,11 @@ class DQN(nn.Module):
 
         #print(x1.size()[0])
         #print(x4.size())
-        if x1.size()[0] > 1:
-            x1 = self.batch1(x1)
-            x2 = self.batch2(x2)
-            x3 = self.batch3(x3)
-            x4 = self.batch4(x4)
+        #if x1.size()[0] > 1:
+        #    x1 = self.batch1(x1)
+        #    x2 = self.batch2(x2)
+        #    x3 = self.batch3(x3)
+        #    x4 = self.batch4(x4)
 
         x = torch.cat((x1, x2, x3, x4), dim=1)
         x = F.relu(self.hidden2(x))
@@ -170,17 +182,18 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
         events.append(GETTING_AWAY)
 
     escape = deadly_bomb(old_game_state, new_game_state, events)
-    if escape == 1:
-        events.append("BOMB_ESCAPE_P")
-    if escape == -1:
-        events.append("BOMB_ESCAPE_M")
-
+    
     radius = bomb_radius(old_game_state, new_game_state)
     events.append(BOMB_RADIUS)
 
     crates = bomb_crates(old_game_state, new_game_state, events)
-    events.append(BOMB_CRATES)
 
+    if "BOMB_DROPPED" in events:
+        events.append(BOMB_CRATES)
+        if escape == 1:
+            events.append("BOMB_ESCAPE_P")
+        if escape == -1:
+            events.append("BOMB_ESCAPE_M")
     #print(events)
 
     # state_to_features is defined in callbacks.py
@@ -223,6 +236,29 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     batch = Transition(*zip(*transitions))
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch.next_state)), dtype=torch.bool, device=device)
 
+    self.memory.save_score(last_game_state['self'][1])
+    self.memory.save_reward(int(sum(batch.reward)))
+    reward_len = len(self.memory.rewards)
+    if reward_len - self.memory.rounds >= 500:
+        plt.close('all')
+        fig = plt.figure()
+        plt.plot(self.memory.rewards)
+        plt.title("Sum of Rewards after each Round")
+        plt.xlabel("Round")
+        plt.ylabel("Sum of Rewards")
+        path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_worlds\\plots\\"
+        fig.savefig(path + "rewards_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
+
+        fig = plt.figure()
+        plt.plot(self.memory.scores)
+        plt.title("Score at the End of each Round")
+        plt.xlabel("Round")
+        plt.ylabel("Score")
+        path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_worlds\\plots\\"
+        fig.savefig(path + "scores_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
+
+        self.memory.rounds = reward_len
+
     action_batch = torch.cat(batch.action).to(device)
     reward_batch = torch.cat(batch.reward).to(device)
 
@@ -231,18 +267,19 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     state_action_values = self.policy_net(torch.stack(states[0]), torch.stack(states[1]), torch.stack(states[2]), torch.stack(states[3])).to(device)
     state_action_values = state_action_values.gather(1, action_batch)
 
-    input1 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 7, 7), device = device)
-    input2 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 7, 7), device = device)
-    input3 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 7, 7), device = device)
-    input4 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 16), device = device)
-    for i, s in enumerate(batch.next_state):
-        with torch.no_grad():
-            if non_final_mask[i]:
-                input1[i] = s[0]
-                input2[i] = s[1]
-                input3[i] = s[2]
-                input4[i] = s[3]
-    next_state_values = self.target_net(input1, input2, input3, input4).to(device)
+    next_states = list(zip(*batch.next_state))
+    input1 = torch.stack(next_states[0]).to(device)
+    input2 = torch.stack(next_states[1]).to(device)
+    input3 = torch.stack(next_states[2]).to(device)
+    input4 = torch.stack(next_states[3]).to(device)
+    input1[non_final_mask] = torch.zeros((int(sum(non_final_mask)),) + tuple(input1.size()[1:len(input1.size())]), device = device)
+    input2[non_final_mask] = torch.zeros((int(sum(non_final_mask)),) + tuple(input2.size()[1:len(input2.size())]), device = device)
+    input3[non_final_mask] = torch.zeros((int(sum(non_final_mask)),) + tuple(input3.size()[1:len(input3.size())]), device = device)
+    input4[non_final_mask] = torch.zeros((int(sum(non_final_mask)),) + tuple(input4.size()[1:len(input4.size())]), device = device)
+    #if int(sum(non_final_mask)) != 0:
+    #    print(sum(non_final_mask))
+    with torch.no_grad():
+        next_state_values = self.target_net(input1, input2, input3, input4).to(device)
     next_state_values = next_state_values.max(1)[0]
 
     # Compute the expected Q values
