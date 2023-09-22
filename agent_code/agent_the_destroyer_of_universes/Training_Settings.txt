@@ -1,0 +1,68 @@
+agent_the_destroyer_of_worlds_2
+1. Coin-heaven, 7x7 feld, 49 coins, 60 steps, 10000 runden, hat sehr gut münzen sammeln gelernt (legt ab und an bomben, bringt sich selten selbst um)
+2. Coin-heaven, 11x11 feld, 20 coins, 60 steps, 3000 runden, kann im großen feld recht effizient münzen sammeln (legt immer noch bomben, bringt sich zwar nicht selbst um, aber es nimmt ihm die zeit richtung münze zu laufen)
+
+agent_the_destroyer_of_worlds_2_training_optimization
+1. Coin-heaven, 11x11 feld, 20 coins, 60 steps, 5000 runden, kann in ordnung münzen sammeln, bringt sich ab und an selbst um und bleibt manchmal stecken, also bewegt sich nur auf 2 feldern hin und her
+2. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 2500 runden, kann in kleinem feld sehr effizient münzen sammeln, im größeren bleibt er manchmal hängen, manchmal sehr effizient
+3. Coin-heaven, 11x11 feld, 20 coins, 60 steps, 5000 runden, mit peaceful_agent als konkurrent, kann gut münzen sammeln, bringt manchmal den gegner um, und dabei meistens dann auch sich selbst
+
+agent_the_destroyer_of_worlds from git, with batchnorm
+1. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 5000 runden, sammelt ok die münzen, legt immer auf selben feld bombe und bringt sich selbst um, ca. 18 Minuten
+2. selbe wie oben, sammelt besser die Münzen, bringt sich immer noch oft an der selben Stelle um, ca. 15 Minuten
+3. selbe wie oben, sammelt noch besser Münzen, bringt sich oft selbst um, nicht immer an der selben stelle, ca. 16 Minuten
+
+agent_the_destroyer_of_worlds from git, ohne batchnorm
+1. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 15000 runden, sehr gut münzen sammeln, selten bomben legen (selten selbst umgebracht, plots)
+2. Loot-crate, 11x11 feld, 20 coins, crate density 0.4, 100 steps, 300 runden, kann so gut wie nichts
+3. wie oben, 10000 runden, aus der ecke links oben läuft er ganz gut, die restlichen geht so
+4. wie oben, 10000 runden, er ist ok, bringt sich aber oft selbst um, habe das gefühl gewählte escape route war nicht frei 
+5. wie oben, 120 steps, 50000 runden, läuft alleine sehr gut, bringt sich selten selber um
+6. wie oben, 200 steps, 1000 runden, schafft es nicht alle münzen zu sammeln
+7. wie oben, 200 steps, 10000 runden, ist ok, ist glaube ich kovergiert, also müsste evtl noch an den rewards was gemacht werden? vor allem was das bomben legen, bzw. selbst umbringen angeht, läuft manchmal immer noch in sackgasse
+8. classic, 11x11 feld, 9 coins, crate density 0.75, 200 steps, 20000 runden, keine chance gegen den coin collector, wenn er alleine ist läuft er manchmal richtig gut und manchmal bringt er sich selbst um, selten bleibt er einfach stehen nachdem er eine bombe gelegt hat
+9. selbe wie oben, 10000 runden, ist konvergiert, schafft es nicht besser
+10. selbe wie oben, aber rule based als konkurrent, 20000 runden, ist nicht sonderlich gut, bringt sich oft selbst um, sieht aber auch nicht so aus als würde der reward sich verbessern
+11. selbe wie oben, aber mit 17x17 feld, 20000 runden, mal so mal so
+
+agent_the_destroyer_of_worlds from git, neuer reward
+1. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 10000 runden, sehr gut münzen sammeln, bringt sich nicht selbst um, aber legt unnötige bomben, die ihm die zeit zum sammeln wegnehmen
+2. loot-crate, 11x11 feld, crate density 0.4, 20 coins, 100 steps, 10000 runden, bringt sich schon selbst um
+
+agent_the_destroyer_of_worlds from git, neuer reward, verbesserungen
+1. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 10000 runden, sehr gut, oft bomben gelegt, aber nicht selber umgebracht und 20 mal (immer) alle münzen gesammelt
+2. loot-crate, 11x11 feld, crate denstiy 0.4, 20 coins, 100 steps, 10000 runden, nicht gut, oft selbst umgebracht
+3. selbe wie davor, 5000 runden, wurde definitv nochmal besser
+4. selbe wie davor, 7000 runden, bringt sich zu oft selber um
+5. selbe, bringt sich zu oft selber um
+
+agent_the_destroyer_of_worlds from git, neuer reward, verbesserungen 2
+1. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 4000 runden, gut bleibt an den selben stellen hängen
+2. nochmal 2000, besser, bleibt seltener stecken
+3. nochmal 2000, sehr gut, hat 20 mal hintereinander sehr schnell alle gesammelt
+4. loot-crate, 11x11 feld, 20 coins, crate density 0.4, 120 steps, 10000 runden, bleibt oft einfach stehen, läuft in explosion rein
+5. nochmal 3000, immer noch recht schlecht
+6. nochmal 5000, etwas besser, also ist noch am lernen?
+7. nochmal 8000, nochmal besser, also noch am lernen?
+8. nochmal 8000
+9. nochmal 8000, läuft ziemlich gut, aber ist glaube ich nach wie vor sich am verbessern
+10. nochmal 10000, eher nicht nochmal verbessert, läuft von bombe weg in sackgasse und bringt sich damit selber um
+11. nochmal 8000
+
+agent_the_destroyer_of_worlds from git, neuer reward, verbesserungen 2
+1. Coin-heaven, 7x7 feld, 40 coins, 60 steps, 8000 runden, gut, 20 mal hintereinander alle gesammelt
+2. loot-crate, 11x11 feld, 20 coins, crate density 0.4, 120 steps, 15000 runden, mal so mal so, bringt sich immer selber um oder ist in schleife gefangen
+3. nochmal 10000, geht so...
+4. classic, 17x17 feld, 9 coins, crate density 0.75, coin_collector und peaceful konkurrent, 200 steps, 40000 runden, keine chance gegen coin collector, bringt sich oft selber um, sieht aber kovergiert aus
+5. nochmal 10000, nicht wirklich besser
+6. kleine reward änderung, deshalb noch 10000 ohne konkurrent um zu schauen ob was kaputt ist, oder besser wurde, bringt sich selten direkt um, glaube eher besser als schlechter
+7. nochmal ohne konkurrent 20000 runden, joa mal so mal so
+8. 10000 runden mit rule_based und coin_collector konkurrent, schlägt sich gar nicht so schlecht
+9. 10000 runden mit 2 ruled based und einem coin collector, joa ist in ordnung
+10. 40000 definitiv konvergiert
+11. ohne coins nur ein paar crates 0.2, 10000 runden (mal schauen ob er besser mit den bomben andere klar kommt und es schafft andere umzubringen
+
+plot möglichkeiten: sum(reward)/steps
+wie lange er überlebt
+wie viele punkte er hat
+mit random agent vergleichen (plot für random agent)
