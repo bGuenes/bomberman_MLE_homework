@@ -23,6 +23,12 @@ def setup(self):
 
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
+    global device
+    if torch.backends.mps.is_available():
+        device = torch.device("cpu")  # add mps if on mac
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device: " + str(device))
 
     if self.train and not os.path.isfile("my-saved-model.pt"):
         print("Setting up model from scratch.")
@@ -97,44 +103,62 @@ def state_to_features(game_state: dict) -> np.array:
     vision_coordinates[0] += my_pos[0] - reach
     vision_coordinates[1] += my_pos[1] - reach
     vision_coordinates = vision_coordinates.T
-    vision_coordinates = vision_coordinates.reshape(((reach*2+1)**2, 2))
+    vision_coordinates = vision_coordinates.reshape(((reach * 2 + 1) ** 2, 2))
+
+    outside_map = np.zeros((4, 4))  # coins, crates, bombs, other agents
 
     # --- map with walls (-1), free (0) and crates (1) ---------------------------------------------------------------
+    min_coor = np.min(vision_coordinates, axis=0)
+    max_coor = np.max(vision_coordinates, axis=0)
     wall_crates = np.zeros((reach * 2 + 1, reach * 2 + 1)) - 1  # outside of game also -1
-    for coord in vision_coordinates:
-        if not 0 < coord[0] < field.shape[0] or not 0 < coord[1] < field.shape[1]:
-            next
-        else:
-            x = coord[0] - my_pos[0] + reach
-            y = coord[1] - my_pos[1] + reach
-            wall_crates[x, y] = field[coord[0], coord[1]]
+    if 0 <= min(min_coor) and all(max_coor < field.shape):
+        wall_crates[:, :] = field[min_coor[0]:max_coor[0] + 1, min_coor[1]:max_coor[1] + 1]
+    else:
+        wall_crates[abs(min(0, min_coor[0])):8 - abs(min(0, field.shape[0] - 2 - max_coor[0])),
+        abs(min(0, min_coor[1])):8 - abs(min(0, field.shape[1] - 2 - max_coor[1]))] = field[max(0, min_coor[0]):min(
+            max_coor[0] + 1, field.shape[0]), max(0, min_coor[1]):min(max_coor[1] + 1, field.shape[1])]
 
-    # --- map with explosion (-1) free (0) and coins (1) -------------------------------------------------------------
+        # --- map with explosion (-1) free (0) and coins (1) -------------------------------------------------------------
     explosion_coins = np.zeros((reach * 2 + 1, reach * 2 + 1))
-
     explosion_coord = np.transpose((explosion_map > 0).nonzero())
-    for expl in explosion_coord:
-        if any(sum(expl == i) == 2 for i in vision_coordinates):
-            x_expl = expl[0] - my_pos[0] + reach
-            y_expl = expl[1] - my_pos[1] + reach
-            explosion_coins[x_expl, y_expl] = -1
 
-    for coin in coins:
-        if any(sum(np.asarray(coin) == i) == 2 for i in vision_coordinates):
-            x_coin = coin[0] - my_pos[0] + reach
-            y_coin = coin[1] - my_pos[1] + reach
-            explosion_coins[x_coin, y_coin] = 1
+    existing_coords = explosion_coord[(explosion_coord[:, None] == vision_coordinates).all(-1).any(-1)]
+    existing_coords[:, 0] = existing_coords[:, 0] - my_pos[0] + reach
+    existing_coords[:, 1] = existing_coords[:, 1] - my_pos[1] + reach
+    explosion_coins[existing_coords.T[0], existing_coords.T[1]] = -1
+
+    if len(coins) > 0:
+        coins = np.asarray(coins)
+        existing_coins = coins[(coins[:, None] == vision_coordinates).all(-1).any(-1)]
+        existing_coins[:, 0] = existing_coins[:, 0] - my_pos[0] + reach
+        existing_coins[:, 1] = existing_coins[:, 1] - my_pos[1] + reach
+        explosion_coins[existing_coins.T[0], existing_coins.T[1]] = 1
 
     # --- map with bomb range (-1), free (0) and opponents (1) --------------------------------------------------------
     bomb_opponents = np.zeros((reach * 2 + 1, reach * 2 + 1))
+    vision_coordinates2 = vision_coordinates[:, np.newaxis, :]
 
-    for enemy in others:
-        if any(sum(enemy[3] == i) == 2 for i in vision_coordinates):
-            x_enemy = enemy[3][0] - my_pos[0] + reach
-            y_enemy = enemy[3][1] - my_pos[1] + reach
-            bomb_opponents[x_enemy, y_enemy] = 1
+    if len(others) > 0:
+        others2 = np.array(list(map(itemgetter(3), others)))
+        if len(others2) > 0:
+            others2 = others2[np.newaxis, :, :]
+            mask = np.all(vision_coordinates2 == others2, axis=2)
+            mask = np.where(mask.any(axis=1))
+            if len(mask) > 0:
+                visable = vision_coordinates2[mask] - my_pos + reach
+                bomb_opponents[tuple(visable.T)] = 1
 
     for bomb in bombs:
+        # outside_map getting bombs outside vision field
+        if bomb[0][1] < top:
+            outside_map[2, 0] = 1
+        if bomb[0][1] > bottom:
+            outside_map[2, 1] = 1
+        if bomb[0][0] < left:
+            outside_map[2, 2] = 1
+        if bomb[0][0] > right:
+            outside_map[2, 3] = 1
+
         if any(sum(bomb[0] == i) == 2 for i in vision_coordinates):
             # coordinate of bomb in our vision matrix
             x_bomb = bomb[0][0] - my_pos[0] + reach
@@ -171,39 +195,63 @@ def state_to_features(game_state: dict) -> np.array:
                     break
                 else:
                     bomb_opponents[x_bomb, y_bomb - j] = -1
-        else: next
+        else:
+            next
 
     # --- scaled down vision outside reach ---------------------------------------------------------------------------
-    outside_map = np.zeros((4, 4))  # coins, crates, bombs, other agents
 
     for i in range(0, field.shape[0]):
         for j in range(0, field.shape[1]):
 
             field_value = field[i, j]
-            if field_value == 0:
-                next
-            else:
-                # coins = 3, crates = 2, bombs and explosions = -1 -> make it to 1, other agents >= 5 -> make it to 0 (index)
-                if field_value == -1:
-                    field_value = 1
-                elif field_value >= 5:
-                    field_value = 0
-
+            if field_value == 1:
                 if j < top:
-                    outside_map[0, field_value] = 1
+                    outside_map[1, 0] += 1
                 if j > bottom:
-                    outside_map[1, field_value] = 1
+                    outside_map[1, 1] += 1
                 if i < left:
-                    outside_map[2, field_value] = 1
+                    outside_map[1, 2] += 1
                 if i > right:
-                    outside_map[3, field_value] = 1
+                    outside_map[1, 3] += 1
 
-    '''print(wall_crates)
-    print(explosion_coins)
-    print(bomb_opponents)
-    print()
-    '''
-    features = wall_crates.flatten().tolist() + explosion_coins.flatten().tolist() \
-                + bomb_opponents.flatten().tolist() + outside_map.ravel().tolist()
+    for coin in np.array(coins):
+        if coin[1] < top:
+            outside_map[0, 0] += 1
+        if coin[1] > bottom:
+            outside_map[0, 1] += 1
+        if coin[0] < left:
+            outside_map[0, 2] += 1
+        if coin[0] > right:
+            outside_map[0, 3] += 1
 
-    return features
+    others2 = np.array(list(map(itemgetter(3), others)))
+    for enemy in others2:
+        if enemy[1] < top:
+            outside_map[3, 0] += 1
+        if enemy[1] > bottom:
+            outside_map[3, 1] += 1
+        if enemy[0] < left:
+            outside_map[3, 2] += 1
+        if enemy[0] > right:
+            outside_map[3, 3] += 1
+
+    for i in range(0, explosion_map.shape[0]):
+        for j in range(0, explosion_map.shape[1]):
+
+            explosion_value = explosion_map[i, j]
+            if explosion_value != 0:
+                if j < top:
+                    outside_map[2, 0] = 1
+                if j > bottom:
+                    outside_map[2, 1] = 1
+                if i < left:
+                    outside_map[2, 2] = 1
+                if i > right:
+                    outside_map[2, 3] = 1
+
+    wall_crates = torch.tensor([wall_crates.tolist()], device=device)
+    explosion_coins = torch.tensor([explosion_coins.tolist()], device=device)
+    bomb_opponents = torch.tensor([bomb_opponents.tolist()], device=device)
+    outside_map = torch.tensor([outside_map.ravel().tolist()], device=device)
+
+    return wall_crates, explosion_coins, bomb_opponents, outside_map

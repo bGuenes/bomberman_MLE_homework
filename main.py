@@ -184,14 +184,14 @@ def main(argv = None):
 
 if __name__ == '__main__':
 
-    import cProfile
+    """import cProfile
     from pstats import Stats
 
     pr = cProfile.Profile()
-    pr.enable()
+    pr.enable()"""
 
     main()
 
-    pr.disable()
+    """pr.disable()
     stats = Stats(pr)
-    stats.sort_stats('cumtime').print_stats(30)
+    stats.sort_stats('cumtime').print_stats(30)"""

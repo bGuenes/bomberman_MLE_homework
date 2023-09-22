@@ -8,6 +8,8 @@ import numpy as np
 import math as m
 from operator import itemgetter
 
+# import from enviroment Generic World from root folder
+
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 
 
@@ -63,7 +65,7 @@ def act(self, game_state: dict) -> str:
         eps_decay = 1000
         round = 1
         sample = random.random()
-        eps_threshold = 0.05  # eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
+        eps_threshold = eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
             round += 1
@@ -76,10 +78,38 @@ def act(self, game_state: dict) -> str:
             round += 1
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.2, .2, .2, .2, .1, .1])]],
                                        dtype=torch.long, device=device)
-    else:
-        action_done = torch.argmax(self.model(x1, x2, x3, x4))
 
+    else:
+        action_done = self.model(x1, x2, x3, x4)
+        inv_action = False
+        i = 1
+        while not inv_action:
+            action_idx = int(torch.topk(action_done.flatten(), i).indices[-1])
+            inv_action = check_inv_action(game_state, ACTIONS[action_idx])
+            if not inv_action:
+                i += 1
+
+        action_done = action_idx
     return ACTIONS[action_done]
+
+
+def check_inv_action(game_state: dict, action: str):
+    field = game_state["field"]
+    agent = game_state["self"]
+
+    my_pos = agent[3]
+
+    # Perform the specified action if possible, wait otherwise
+    if action == 'UP' and field[my_pos[0], my_pos[1] - 1] != 0:
+        return False
+    elif action == 'DOWN' and field[my_pos[0], my_pos[1] + 1] != 0:
+        return False
+    elif action == 'LEFT' and field[my_pos[0] - 1, my_pos[1]] != 0:
+        return False
+    elif action == 'RIGHT' and field[my_pos[0] + 1, my_pos[1]] != 0:
+        return False
+    else:
+        return True
 
 
 def state_to_features(game_state: dict) -> np.array:
