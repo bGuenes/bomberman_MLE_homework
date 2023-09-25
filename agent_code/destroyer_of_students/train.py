@@ -123,7 +123,7 @@ def setup_training(self):
     self.target_net = DQN(n_actions).to(device)
     self.target_net.load_state_dict(self.policy_net.state_dict())
 
-    self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=LR, amsgrad=True)
+    self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=LR)
     self.memory = ReplayMemory(10000)
 
 def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_state: dict, events: List[str]):
@@ -232,7 +232,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # Compute Huber loss
-    criterion = nn.SmoothL1Loss()
+    criterion = nn.MSELoss()
     loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
 
     # Optimize the model
