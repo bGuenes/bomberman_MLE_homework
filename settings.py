@@ -5,8 +5,8 @@ from fallbacks import pygame
 
 # Game properties
 # board size (a smaller board may be useful at the beginning)
-COLS = 7
-ROWS = 7
+COLS = 17
+ROWS = 17
 SCENARIOS = {
     # modes useful for agent development
 	"empty": {
@@ -15,11 +15,11 @@ SCENARIOS = {
     },
     "coin-heaven": {
         "CRATE_DENSITY": 0,
-        "COIN_COUNT": 20
+        "COIN_COUNT": 2
     },
     "loot-crate": { 
         "CRATE_DENSITY": 0.6,
-        "COIN_COUNT": 50
+        "COIN_COUNT": 5
     }, 
     # this is the tournament game mode
     "classic": {
@@ -32,7 +32,7 @@ SCENARIOS = {
 MAX_AGENTS = 4
 
 # Round properties
-MAX_STEPS = 40
+MAX_STEPS = 200
 
 # GUI properties
 GRID_SIZE = 30

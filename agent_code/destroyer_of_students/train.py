@@ -544,7 +544,7 @@ def bomb_crates(old_game_state, new_game_state, events):
                             crates += 1
 
     if "BOMB_DROPPED" in events and crates == 0:
-        crates = -1
+        crates = -5
 
     # print(crates)
     return crates * 5
