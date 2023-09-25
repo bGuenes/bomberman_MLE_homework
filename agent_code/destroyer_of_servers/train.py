@@ -36,7 +36,7 @@ BOMB_ESCAPE_M = "BOMB_ESCAPE_M"
 BATCH_SIZE = 200
 GAMMA = 0.5
 TAU = 0.05
-LR = 1e-4
+LR = 1e-3
 
 class ReplayMemory(object):
 
@@ -108,10 +108,13 @@ def setup_training(self):
 
     # setup device
     global device
-    device = torch.device("cpu")
+    if torch.backends.mps.is_available():
+        device = torch.device("cpu")  # add mps if on mac
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    if self.train and os.path.isfile("my-saved-model.pt"):
-        with open("my-saved-model.pt", "rb") as file:
+    if self.train and os.path.isfile("my-saved-model-server.pt"):
+        with open("my-saved-model-server.pt", "rb") as file:
             self.policy_net = pickle.load(file).to(device)
 
     else:
@@ -263,10 +266,10 @@ def reward_from_events(self, events: List[str], closer: int, crates: int, radius
     """
 
     game_rewards = {
-        e.COIN_COLLECTED: 50,
+        e.COIN_COLLECTED: 10,
         GETTING_CLOSER: 5/closer,
         GETTING_AWAY: 5/closer,
-        e.INVALID_ACTION: -20,  # don't make invalid actions!
+        e.INVALID_ACTION: -5,  # don't make invalid actions!
         e.CRATE_DESTROYED: 8,
         # e.COIN_FOUND: 5,  # quite random
         e.GOT_KILLED: -20,

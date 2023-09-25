@@ -28,7 +28,11 @@ def setup(self):
     :param self: This object is passed to all callbacks and you can set arbitrary values.
     """
     global device
-    device = torch.device("cpu")
+    if torch.backends.mps.is_available():
+        device = torch.device("cpu")  # add mps if on mac
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device: " + str(device))
 
     if self.train and not os.path.isfile("my-saved-model.pt"):
         print("Setting up model from scratch.")
@@ -40,7 +44,7 @@ def setup(self):
 
     else:
         print("Loading model from saved state.")
-        with open("my-saved-model.pt", "rb") as file:
+        with open("my-saved-model-server.pt", "rb") as file:
             self.model = pickle.load(file)
 
 
@@ -61,7 +65,7 @@ def act(self, game_state: dict) -> str:
         eps_decay = 1000
         round = 1
         sample = random.random()
-        eps_threshold = 0.05
+        eps_threshold = 0.3  # eps_start - (eps_start - eps_end) * m.exp(-eps_decay / round)  # higher -> more random
 
         if sample > eps_threshold:
             round += 1
@@ -231,34 +235,34 @@ def state_to_features(game_state: dict) -> np.array:
             field_value = field[i, j]
             if field_value == 1:
                 if j < top:
-                    outside_map[1, 0] = 1
+                    outside_map[1, 0] += 1
                 if j > bottom:
-                    outside_map[1, 1] = 1
+                    outside_map[1, 1] += 1
                 if i < left:
-                    outside_map[1, 2] = 1
+                    outside_map[1, 2] += 1
                 if i > right:
-                    outside_map[1, 3] = 1
+                    outside_map[1, 3] += 1
 
     for coin in np.array(coins):
         if coin[1] < top:
-            outside_map[0, 0] = 1
+            outside_map[0, 0] += 1
         if coin[1] > bottom:
-            outside_map[0, 1] = 1
+            outside_map[0, 1] += 1
         if coin[0] < left:
-            outside_map[0, 2] = 1
+            outside_map[0, 2] += 1
         if coin[0] > right:
-            outside_map[0, 3] = 1
+            outside_map[0, 3] += 1
 
     others2 = np.array(list(map(itemgetter(3), others)))
     for enemy in others2:
         if enemy[1] < top:
-            outside_map[3, 0] = 1
+            outside_map[3, 0] += 1
         if enemy[1] > bottom:
-            outside_map[3, 1] = 1
+            outside_map[3, 1] += 1
         if enemy[0] < left:
-            outside_map[3, 2] = 1
+            outside_map[3, 2] += 1
         if enemy[0] > right:
-            outside_map[3, 3] = 1
+            outside_map[3, 3] += 1
     
     for i in range(0, explosion_map.shape[0]):
         for j in range(0, explosion_map.shape[1]):
