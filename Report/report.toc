@@ -9,6 +9,8 @@
 \contentsline {section}{\numberline {4}Training}{9}{section.4}%
 \contentsline {subsection}{\numberline {4.1}second best agent}{9}{subsection.4.1}%
 \contentsline {section}{\numberline {5}Experiments and Results}{10}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Deep Q-Learning Agent}{10}{subsection.5.1}%
-\contentsline {section}{\numberline {6}Conclusion}{15}{section.6}%
+\contentsline {subsection}{\numberline {5.1}Our second best agent}{10}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Deep Q-Learning Agent}{12}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Conclusion}{17}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Our second best agent}{17}{subsection.6.1}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

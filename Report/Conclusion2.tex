@@ -1,0 +1,13 @@
+\subsection{Our second best agent}
+
+In conclusion, our attempt to develop an agent that initially imitated the rule-based agent and then enhance its capabilities using Q-learning led 
+to mixed results. The training to imitate the rule-based agent was more or less successful, and the agent demonstrated promising performance, aligning with the rule-based 
+strategies in a certain point. However, when we introduced Q-learning to further improve its gameplay, the results were disappointing. Instead of enhancing its skills, 
+the agent's performance steadily declined during training, reaching a point where it was unable to play the game proficiently.
+
+We hypothesized that a significant factor contributing to this issue was the disparity in the dimensionality of the training sets 
+used for imitation and Q-learning. The transition from the well-structured imitation training data to the Q-learning dataset, which likely 
+had different dimensions and characteristics, might have caused confusion and hindered the agent's learning process. This mismatch in the training sets 
+could have led to the deterioration in performance, highlighting the importance of consistent and compatible data when implementing reinforcement learning techniques. 
+Further investigations and refinements in the training process are necessary to address these challenges and achieve successful integration of imitation learning and
+Q-learning for optimal agent performance in the game.
