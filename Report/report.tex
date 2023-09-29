@@ -92,7 +92,48 @@
 % Paket für Zeilenabstand
 \usepackage{setspace}
 
+%new added packages:
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[inline]{enumitem}
 
+% use these constant for defining image widths
+\newcommand{\oneImgWidth}{\linewidth}
+\newcommand{\twoImgWidth}{0.494\linewidth}
+\newcommand{\threeImgWidth}{0.326\linewidth}
+\newcommand{\fourImgWidth}{0.246\linewidth}
+\newcommand{\sixImgWidth}{0.162\linewidth}
+\newcommand{\eightImgWidth}{0.120\linewidth}
+\newcommand{\nineImgWidth}{0.107\linewidth}
+
+\newcommand{\captionadjust}{\vspace{-8pt}}
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{backcolour},   
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{magenta},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\fontsize{8}{8}\selectfont,
+  breakatwhitespace=false,         
+  breaklines=true,                 
+  captionpos=b,                    
+  keepspaces=true,                 
+  numbers=left,                    
+  numbersep=5pt,                  
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \begin{document}
 	\input{Cover}
@@ -121,77 +162,16 @@
 	
 	\section{Introduction}
 
-	The integration of artificial intelligence (AI) into the realm of video gaming has led to groundbreaking advancements 
-	in gameplay and immersive experiences. One of the most intriguing challenges in this endeavor is the development of AI 
-	agents capable of mastering complex and dynamic games such as Bomberman. Bomberman, a classic arcade-style game, 
-	presents a rich and multifaceted environment with intricate decision-making, spatial reasoning, and strategic planning. 
-	Solving Bomberman with an AI agent using reinforcement learning techniques is a fascinating and intricate problem, one 
-	that holds significant promise for the AI and gaming communities.\\
-
-	\noindent Reinforcement learning (RL), a subfield of machine learning, offers a compelling approach to tackle 
-	the Bomberman challenge. RL revolves around training agents to learn optimal strategies by interacting with their 
-	environment, taking actions, and receiving feedback in the form of rewards or penalties. In the context of Bomberman, 
-	RL techniques can be instrumental in enabling AI agents to navigate mazes, strategically place bombs, avoid traps, and 
-	outsmart opponents. Here are a few noteworthy reinforcement learning techniques that hold potential in solving the Bomberman game:
-
-	\begin{description}
-	\item[Q-Learning:] Q-learning is a classic RL algorithm that could be applied to Bomberman. 
-	It enables agents to learn a value function that maps state-action pairs to expected 
-	cumulative rewards. By exploring different actions in the game and updating Q-values, 
-	an AI agent can eventually converge on an optimal strategy.
-
-	\item[Deep Q-Networks (DQN):] DQN extends Q-learning by employing deep neural networks 
-	to approximate the Q-value function. This technique has been successful in handling 
-	complex and high-dimensional state spaces, making it a strong candidate for Bomberman.
-
-	\item[Policy Gradient Methods:] Policy gradient methods aim to directly learn a policy 
-	that specifies the agent's actions in different game states. This approach can be 
-	effective in scenarios where the optimal policy is not easily represented by a value function, 
-	as it allows for a more flexible and direct mapping from states to actions.
-
-	\item[Proximal Policy Optimization (PPO):] PPO is a state-of-the-art RL algorithm that focuses 
-	on optimizing policy functions. It offers stability and strong performance in challenging 
-	environments, making it suitable for Bomberman's dynamic and adversarial setting.
-
-	\item[Actor-Critic Methods:] Actor-critic methods combine value-based and policy-based approaches, 
-	leveraging both a critic (value function) and an actor (policy). This combination can provide the 
-	agent with a more robust learning framework, enhancing its decision-making capabilities.
-
-	In the pursuit of solving Bomberman with an AI agent, the selection and fine-tuning 
-	of the appropriate RL technique, as well as the integration of domain-specific features, will 
-	play pivotal roles in achieving success. This endeavor not only serves as a compelling testbed for 
-	reinforcement learning but also has the potential to elevate the overall gaming experience 
-	by delivering AI opponents that are challenging, adaptive, and engaging.
-	\end{description}
+	\input{Introducion}
 	
+
 	\section{Methods}
 	
-	In this section, we elucidate our methodology and approaches concerning the various machine learning models 
-	that we have developed for the Bomberman game agent. We will also substantiate what has proven effective, articulate 
-	the concepts we have discarded, and expound upon the rationale for ultimately selecting the model we have submitted.
+	\input{Methods2}
 
-	\subsection{Our final best model (first project)}
-	
-	Explained by Berkay
-
-	\subsection{Our second best model (second project)}
-	dwedwedw
-	dwdwdwd
-
-	\subsection{Other aproaches that we had}
-	frfrf
-	rfrfr
-
-	\subsubsection{Q-Tables}
-	swsws
-	cxwcw
-	
-	\subsubsection{Coin-Collector Agent that sees only one coin}
-	fsdff
-	wfwfw
-	
 	\section{Training}
 	
+	\input{Training2}
 	\input{ExperimentsAndResults}
 	
 	\section{Conclusion}

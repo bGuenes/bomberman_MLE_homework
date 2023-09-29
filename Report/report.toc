@@ -3,10 +3,12 @@
 \contentsline {section}{\numberline {3}Methods}{2}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Our final best model (first project)}{2}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Our second best model (second project)}{2}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Other aproaches that we had}{2}{subsection.3.3}%
-\contentsline {subsubsection}{\numberline {3.3.1}Q-Tables}{2}{subsubsection.3.3.1}%
-\contentsline {subsubsection}{\numberline {3.3.2}Coin-Collector Agent that sees only one coin}{2}{subsubsection.3.3.2}%
-\contentsline {section}{\numberline {4}Training}{2}{section.4}%
-\contentsline {section}{\numberline {5}Experiments and Results}{2}{section.5}%
-\contentsline {section}{\numberline {6}Conclusion}{2}{section.6}%
+\contentsline {subsection}{\numberline {3.3}Other aproaches that we had}{7}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Q-Tables}{8}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Coin-Collector Agent that sees only one coin}{8}{subsubsection.3.3.2}%
+\contentsline {section}{\numberline {4}Training}{9}{section.4}%
+\contentsline {subsection}{\numberline {4.1}second best agent}{9}{subsection.4.1}%
+\contentsline {section}{\numberline {5}Experiments and Results}{10}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Deep Q-Learning Agent}{10}{subsection.5.1}%
+\contentsline {section}{\numberline {6}Conclusion}{15}{section.6}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

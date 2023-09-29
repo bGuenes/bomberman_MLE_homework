@@ -16,5 +16,32 @@
   {}
 \endgroup
 
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{Img:autoencoder}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=a0801247a21be0dab4862955ad4211d0}{%
+           family={INC},
+           familyi={I\bibinitperiod},
+           given={COMP\bibnamedelima THREE},
+           giveni={C\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{a0801247a21be0dab4862955ad4211d0}
+      \strng{fullhash}{a0801247a21be0dab4862955ad4211d0}
+      \strng{bibnamehash}{a0801247a21be0dab4862955ad4211d0}
+      \strng{authorbibnamehash}{a0801247a21be0dab4862955ad4211d0}
+      \strng{authornamehash}{a0801247a21be0dab4862955ad4211d0}
+      \strng{authorfullhash}{a0801247a21be0dab4862955ad4211d0}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{\url{https://www.compthree.com/blog/autoencoder/}}
+      \field{title}{Variational Autoencoders are Beautiful}
+      \field{year}{2019}
+    \endentry
+  \enddatalist
+\endrefsection
 \endinput
 
