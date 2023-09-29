@@ -8,7 +8,24 @@ import numpy as np
 import math as m
 from operator import itemgetter
 
+import matplotlib.pyplot as plt
+
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
+
+
+create_plots = False
+path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git5\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_universes_2\\plots\\"
+            
+
+class Memory(object):
+
+    def __init__(self):
+        self.score = 0
+        self.my_scores = []
+        self.round = 1
+    
+    def save_my_score(self, score):
+        self.my_scores.append(score)
 
 
 def setup(self):
@@ -44,6 +61,8 @@ def setup(self):
         print("Loading model from saved state.")
         with open("my-saved-model_mse_rms.pt", "rb") as file:
             self.model = pickle.load(file)
+        if create_plots:
+            self.memory = Memory()
 
 
 def act(self, game_state: dict) -> str:
@@ -56,6 +75,7 @@ def act(self, game_state: dict) -> str:
     :return: The action to take as a string.
     """
     x1, x2, x3, x4 = state_to_features(game_state)
+
 
     if self.train:
         eps_start = 0.9
@@ -77,6 +97,21 @@ def act(self, game_state: dict) -> str:
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.2, .2, .2, .2, .1, .1])]],
                                        dtype=torch.long, device=device)
     else:
+        if create_plots:
+            if self.memory.score < game_state["self"][1]:
+                self.memory.score = game_state["self"][1]
+            if game_state["round"] != self.memory.round:
+                self.memory.save_my_score(self.memory.score)
+                self.memory.score = 0
+                plt.close('all')
+                fig = plt.figure()
+                plt.plot(self.memory.my_scores)
+                plt.title("Score of own Agent after each Round")
+                plt.xlabel("Round")
+                plt.ylabel("Score")
+                fig.savefig(path + "my_scores"+ str(self.memory.round) + ".png")
+                self.memory.round += 1
+
         round = game_state["round"]
         step = game_state["step"]
         if round % 500 == 0 and step == 1:

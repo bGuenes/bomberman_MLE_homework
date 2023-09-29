@@ -42,15 +42,19 @@ GAMMA = 0.5
 TAU = 0.05
 LR = 1e-3
 
+# plot param
+create_plots = False
+plot_frequency = 500
+path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git5\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_universes_2\\plots\\"
+            
+
 class ReplayMemory(object):
 
     def __init__(self, capacity):
         self.memory = deque([], maxlen=capacity)
         self.rewards = [0]
         self.scores = [0]
-        self.rounds = 0
         self.mean_rewards = [0]
-        self.survival = 0
         self.survival_list = [0]
 
     def push(self, *args):
@@ -190,7 +194,6 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
         if escape == -1:
             events.append("BOMB_ESCAPE_M")
 
-    self.memory.survival += 1
     # state_to_features is defined in callbacks.py
     self.memory.push(
         state_to_features(old_game_state),
@@ -230,50 +233,42 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     transitions = self.memory.sample(BATCH_SIZE_CORRECTED)  # Will need to play with the batch size!
     batch = Transition(*zip(*transitions))
     non_final_mask = torch.tensor(tuple(map(lambda s: s is None, batch.next_state)), dtype=torch.bool, device=device)
+    if create_plots:
+        self.memory.save_score(last_game_state['self'][1])
+        self.memory.save_reward(int(sum(batch.reward)))
+        self.memory.save_survival(last_game_state["step"])
+        self.memory.save_reward_mean(int(sum(batch.reward)/last_game_state["step"]))
+        
+        if last_game_state["round"] % plot_frequency == 0:
+            plt.close('all')
+            fig = plt.figure()
+            plt.plot(self.memory.rewards)
+            plt.title("Sum of Rewards after each Round")
+            plt.xlabel("Round")
+            plt.ylabel("Sum of Rewards")
+            fig.savefig(path + "rewards_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
 
-    self.memory.save_score(last_game_state['self'][1])
-    self.memory.save_reward(int(sum(batch.reward)))
-    self.memory.survival += 1
-    self.memory.save_survival(self.memory.survival)
-    self.memory.save_reward_mean(int(sum(batch.reward)/self.memory.survival))
-    reward_len = len(self.memory.rewards)
-    if reward_len - self.memory.rounds >= 500:
-        plt.close('all')
-        fig = plt.figure()
-        plt.plot(self.memory.rewards)
-        plt.title("Sum of Rewards after each Round")
-        plt.xlabel("Round")
-        plt.ylabel("Sum of Rewards")
-        path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git3\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_universes\\plots\\"
-        fig.savefig(path + "rewards_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
+            fig = plt.figure()
+            plt.plot(self.memory.mean_rewards)
+            plt.title("Mean of Rewards per Step after each Round")
+            plt.xlabel("Round")
+            plt.ylabel("Mean of Rewards")
+            fig.savefig(path + "mean_rewards_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
 
-        fig = plt.figure()
-        plt.plot(self.memory.mean_rewards)
-        plt.title("Mean of Rewards per Step after each Round")
-        plt.xlabel("Round")
-        plt.ylabel("Mean of Rewards")
-        path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git3\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_universes\\plots\\"
-        fig.savefig(path + "mean_rewards_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
+            fig = plt.figure()
+            plt.plot(self.memory.survival_list)
+            plt.title("Survival Length per Round")
+            plt.xlabel("Round")
+            plt.ylabel("Survival Length")
+            fig.savefig(path + "survival_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
 
-        fig = plt.figure()
-        plt.plot(self.memory.survival_list)
-        plt.title("Survival Length per Round")
-        plt.xlabel("Round")
-        plt.ylabel("Survival Length")
-        path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git3\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_universes\\plots\\"
-        fig.savefig(path + "survival_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
+            fig = plt.figure()
+            plt.plot(self.memory.scores)
+            plt.title("Score at the End of each Round")
+            plt.xlabel("Round")
+            plt.ylabel("Score")
+            fig.savefig(path + "scores_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
 
-        fig = plt.figure()
-        plt.plot(self.memory.scores)
-        plt.title("Score at the End of each Round")
-        plt.xlabel("Round")
-        plt.ylabel("Score")
-        path = "C:\\Eigene Dateien\\Studium\\10.Semester\\MLEssentials\\Projekt\\Git3\\bomberman_MLE_homework\\agent_code\\agent_the_destroyer_of_universes\\plots\\"
-        fig.savefig(path + "scores_" + time.strftime("%Y-%m-%d %H%M%S") + ".png")
-
-        self.memory.rounds = reward_len
-    
-    self.memory.survival = 0
     action_batch = torch.cat(batch.action).to(device)
     reward_batch = torch.cat(batch.reward).to(device)
     states = list(zip(*batch.state))
