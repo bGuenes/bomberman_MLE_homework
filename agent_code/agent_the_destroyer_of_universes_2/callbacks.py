@@ -77,6 +77,11 @@ def act(self, game_state: dict) -> str:
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.2, .2, .2, .2, .1, .1])]],
                                        dtype=torch.long, device=device)
     else:
+        round = game_state["round"]
+        step = game_state["step"]
+        if round % 500 == 0 and step == 1:
+            setup(self)
+
         action_done = self.model(x1, x2, x3, x4)
         inv_action = False
         i = 1
