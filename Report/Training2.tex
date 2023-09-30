@@ -1,3 +1,74 @@
+\fancyhead[R]{Leonie Boland}
+\subsection{Deep-Q Learning Agent} \label{sec:deepqtraining}
+
+\subsubsection{Training Environment Progression}
+
+We always conducted a similar training routine, namely starting off with a small field with height and width of 7 containing coins on every tile, so 21 coins in total. This game environment is called coin heaven in the following. Starting the training with this scenario gave us the opportunity to already evaluate if there are flaws in the implementation or how fast the network converges with the chosen hyperparameters. This is evaluated in more detail in section \ref{sec:deepqexperiments}. Then we scaled the field up to 11 $\times$ 11 and increased the difficulty by including crates. In this environment, called loot crate, we included 20 coins and used a crate density of 40\%. Finally the agent was trained with all settings as in the target field, that is a 17 $\times$ 17 field, 9 coins and a crate density of 0.75. The last step was to add opponents to this classic environment to train in the exact same environment our agent will be tested in. Simultaneously to raising size and difficulties we also increased the steps per round from 60 to 120 to 200, as the agent does not need 200 steps to collect all coins in a field as small as 7 $\times$ 7.
+
+\subsubsection{Self-Play Strategy}
+
+After the agent was trained without opponents to learn the basic skills like dropping a bomb to destroy crates, escaping that bomb and collecting coins, the agent needed to find out how to compete against opponents. This is where self-play comes into action. Utilizing the self-play strategy means that the model is trained while competing against itself. The advantage of this training strategy is, that the opponent has a similar level. This is desirable as a too weak opponent would not force the model to find a way to play a game more efficiently. Actually, the worst case scenario would be, that the agent learns nothing new in comparison to running the game without opponents. However, a too strong opponent would take the opportunity to learn something away from our agent, as the other opponent would collect the coins faster or kill our agent easily. Hence, we trained our agent against itself and our not training agent reloaded the model that is currently trained after every 500 rounds. As the agent improves over time, it faces progressively more challenging opponents, leading to continuous improvement and skill development. \cite{selfplay} Sadly, we only explored this strategy after handing in our best running agent at the time of the deadline. We have no data to proof that the self-play trained agent excels the previous agent but our hypothesis is, that it does.
+
+\subsubsection{Auxiliary Rewards} \label{sec:rewards}
+
+The basic concept of reinforcement learning is, to give the agent rewards depending on the action taken in a game state that leads to a new game state. In the case of Bomberman the agent could learn the essentials to play the game by getting a reward respectively a penalty for the standard events that can occur. The standard events we chose to reward are "coin collected", "invalid action", "crate destroyed", "got killed",  "killed opponent", "killed self", "survived round" and "waited". In theory the model should be able to learn how to play the game well just by receiving appropriate positive rewards for collecting a coin, destroying crates, killing opponent and surviving one game round, and negative rewards for taking an invalid action, getting killed by an opponent or oneself and waiting. But as these rewards are very sparse the model would take a lot of time to convert the rewards into efficient moves of the agent depending on the game state. Hence to speed up the training process of the Deep-Q learning model we added auxiliary rewards that complement the standard rewards.
+\\ \\
+\textbf{Reward for moving towards the closest coin:}
+
+First of all, we not only give a reward if the agent collects a coin but also when the agent moves in a way that brings itself closer to the closest coin. We have implemented that by looping over all coins and calculating the distance of the agent to the coins in the old game state to save the position of the closest coin. Then we compare the distance of the agent to that closest coin in the old versus the new game state. If the distance got smaller the reward is 10 divided by the old distance. This way getting closer to a coin is more important when the coin is close in comparison to when the coin is far away. We chose that gradation of the reward because an opponent could get to the coin faster anyway when it is too far away from our agent, or there might be a better action to do, like dropping a bomb to destroy many crates, instead of moving toward that far away closest coin. If the agent has the same distance to the closest coin in the old and new game state it is rewarded with 0.5. 
+
+The third option is, that the agent moves away from the closest coin, but in this case we have to take a closer look, as it might be necessary to move away from the coin to actually get to the coin at all in the end. Hence we check if the direct way to the coin is blocked by a wall, in which case the agent would need to move a tile in a direction that brings it further away from the coin. This scenario is showcased in Figure \ref{fig:coin-blocked}. This would be rewarded the same way as keeping the same distance to the coin, so with 0.5. Otherwise, if the agent moves away without the need to, it gets a negative reward of 10 divided by the new distance to the closest coin, with the same justification as explained before.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{images/coin_blocked.png}
+	\caption{In this extract of Bomberman the agent is positioned only two tiles away from the closest coin, but a wall is blocking the direct way to the coin. So by moving up or down one tile the agent would be three tiles away from that coin. However, this step is necessary to get to the coin at all, so here it is not penalised to move away from the coin, like it normally is.}
+	\label{fig:coin-blocked}
+\end{figure}
+
+\textbf{Rewarding each crate that will be destroyed by a dropped bomb and considering the necessity of a dropped bomb:}
+
+Next we included two reward functions that are closely related to each other, namely a function counting and rewarding all crates that will be destroyed by a bomb dropped by our agent and another function penalising or rewarding the necessity of a bomb dropped by our agent. To count all crates that are lying in the bomb's explosion radius we have to check each tile that is impacted by the bomb for the existence of a crate. To do that we need to be sure that the index of the potential explosion radius is part of the game's field and if there is a crate it could be protected by a wall blocking the explosion. Every crate that will be destroyed by a bomb gives an extra 5 point reward. If no crate will be destroyed the reward is -5. 
+
+Additionally, the bomb necessity reward function monitors if there is a opponent in a 7 $\times$ 7 field around the dropped bomb because this opponent could potentially move into the explosion radius. Every opponent fulfilling this condition brings an extra 2 point reward, while the action of dropping a bomb in a position where no opponent is in the 7 $\times$ 7 field and no crate will be destroyed results in a negative reward of 22.
+\\ \\
+\textbf{Punishment for a dropped bomb without an escape route:}
+
+In regards to bombs dropped by our agent we introduced one more reward, as one of the worst moves an agent can do in this game is dropping a bomb that the agent cannot escape from. Consequently, we penalised this very hard with -100. To control if there is an escape route we initialized four variables, each variable illustrating one direction in which the agent could escape, with False. Then the implementation works its way from the outside to the inside, first looking if the tiles outside of the bomb's explosion radius in all four directions are free, which turns the boolean variable accordingly to True. Next, one tile closer to the bomb, we check if this tile is free and one of the adjacent tiles that are not affected by the explosion are free too. This would result in changing the corresponding direction variable to True as the agent would be able to escape to these adjacent tiles in time before the bomb goes off. However, if the tile on the way to the adjacent safety spots is blocked by a wall or crate the variable is changed back to False even when it could have been True before. This is done again for a tile even closer to the bomb, and so on, for all four directions. Concluding we have four variables that state whether in a direction, so to the bottom, top, left or right, there is an escape route or not. If any of these variable's values is True there is an escape route and the agent is rewarded with 2 for dropping a bomb that it can escape from. Otherwise, as mentioned before, the punishment is -100.
+\\ \\
+\textbf{Assess movements made by the agent in regards to all bombs on the field:}
+
+Lastly, the agent has to pay attention to every bomb, not only its own bombs and eventually move to safety. With our final reward function called bomb radius we gave the agent positive feedback when moving away from a bomb and finding a safe spot and negative feedback if the agent moves back into a bomb radius or gets closer to a bomb. To do so, we first examine if the agent is positioned on the same spot as a bomb, so probably the bomb we are dealing with is a self dropped bomb. Then we use the function explained above that determines the possible directions that the agent can escape to and reward the agent for moving in a direction where it is possible to escape. On the other hand of course the agent is punished with a negative reward for going in a direction without a possibility to escape. 
+
+If the agent is not positioned on the exact same x- and y-positions of a bomb but rather one coordinate, so either x- or y-coordinate, overlap with a bomb we have to take a couple of cases into consideration. First, is a wall protecting the agent from the explosion anyway? If the answer to this question is yes we are not interested in rewarding the move the agent does because it was not in danger in the first place, and cannot move into the danger zone of this bomb with one action. Without a protecting wall, the question is whether the agent is too close to a bomb, so that the explosion would kill the agent. In this case the agent gets a small reward for moving away but still being in the bomb's radius and a higher reward for moving to a tile that will not be affected by the bomb's explosion. However, if the agent does not move away it is punished. There is also the possibility that the agent was not in the bomb radius and moved into it, which gets punished as well. The same is done in the third case, that the agent had no overlapping coordinates but moved into the bombs radius.
+
+The reward, no matter if positive or negative, determined by all the above mentioned if-cases is multiplied by 4 subtracted by the count down until the bomb explodes, which ranges from 3 to 0. So if the bomb was just dropped and has a count down number of 3, the reward stays the same as it is multiplied by 1.On the other hand, if the bomb goes off soon, so the count down number is 0 the reward is multiplied by 4. By including this multiplication we hoped to emphasize the need to get out of the way of a bomb if it detonates soon. Additionally, the agent should not hesitate to move through a bomb radius to, for example, come closer to a coin if the count down of a bomb is still high.
+\\ 
+
+All of these auxiliary rewards needed to be adjusted such that the agent understands the priorities of the game and does not make unnecessary moves due to bad rewarding. Eventually, our final agent learned how to play the game fairly efficient after a total of 100,000 rounds of training in different scenarios with different settings, which would not have been possible with only the standard rewards.
+
+\newpage
+\fancyhead[R]{Berkay Günes}
+\subsubsection{Input features} \label{InFeatures}
+It is important to preprocess the input to the Neural Network, else it would be difficult for the Network to determine the important parts out of the big feature state that is provided by the game environment.\\
+We decided to limit the vision of the agent to a surrounding of a 7x7 grid. This gives the benefit of being able to train the agent on different game sizes and being able to scale the game without the agent losing information.\\ \\
+Since Neural networks prefer working with ones and zeros we tried to separate each information as much as possible and not cramp all available informations into one array with different numbers.\\
+Therefore we created three 7x7 arrays, that contain -1 for one type of information on that field and 1 for another. So one array has -1 for walls and 1 for crates, the second array has -1 for explosions and 1 for coins and the third array contains -1 for bombs and their range and 1 for opponents.\\
+To give the agent a chance to have a sense for whats outside of his narrow world view, we implemented a 4x4 array that contains informations, whether there is a coin, crate, explosion/bomb or opponent to the right, left, top or bottom of the agent.\\ \\
+So the input to our neural network contains three 7x7 arrays with a vision of its surroundings and a 4x4 array with an outside view.
+
+% ----------------------------------------------------------------------------------------------------------------------------------------------
+
+\subsubsection{Network structure} \label{NetworkS}
+
+A significant part to how well the agent performs and its dependencies to learn are defined by its Neural Network structure.\\
+We tried different approaches to determine what gives the agent the best possibility to master the game.\\
+Our final agent has a Network that takes in four tensors and has an individual pipeline for each of these tensors in the first two layers. Afterwards they get connected into one fully connected layer before they connect to the output layer.\\
+As described in \ref{InFeatures} we give our network three arrays with a 7x7 view around the agent. These array go each through a convolutional layer and get each passed into their own linear layer before they all get connected in the layer before the output.\\ \\
+The idea behind this network structure is to let the network first process all informations on crates, walls, coins, bombs, explosions and opponents independently, before everything gets mushed together.
+
+\newpage
+\fancyhead[R]{Kevin Klein}
 \subsection{second best agent}
 
 In this section, we describe how we trained our second-best agent. This agent initially imitates 

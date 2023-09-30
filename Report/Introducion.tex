@@ -1,42 +1,34 @@
-The integration of artificial intelligence (AI) into the realm of video gaming has led to groundbreaking advancements 
-in gameplay and immersive experiences. One of the most intriguing challenges in this endeavor is the development of AI 
-agents capable of mastering complex and dynamic games such as Bomberman. Bomberman, a classic arcade-style game, 
-presents a rich and multifaceted environment with intricate decision-making, spatial reasoning, and strategic planning. 
-Solving Bomberman with an AI agent using reinforcement learning techniques is a fascinating and intricate problem, one 
-that holds significant promise for the AI and gaming communities.\\
 
-\noindent Reinforcement learning (RL), a subfield of machine learning, offers a compelling approach to tackle 
-the Bomberman challenge. RL revolves around training agents to learn optimal strategies by interacting with their 
-environment, taking actions, and receiving feedback in the form of rewards or penalties. In the context of Bomberman, 
-RL techniques can be instrumental in enabling AI agents to navigate mazes, strategically place bombs, avoid traps, and 
-outsmart opponents. Here are a few noteworthy reinforcement learning techniques that hold potential in solving the Bomberman game:
+\fancyhead[R]{Berkay Günes}
+%- problem\\
+%- brief overview of methods:\\
+%- Deep Q Learning give examples where its used (e.g. Mario)\\
+%- definitely all methods mentioned in the lecture\\
+%- maybe research more possibilities and examples when its used
 
-\begin{description}
-\item[Q-Learning:] Q-learning is a classic RL algorithm that could be applied to Bomberman. 
-It enables agents to learn a value function that maps state-action pairs to expected 
-cumulative rewards. By exploring different actions in the game and updating Q-values, 
-an AI agent can eventually converge on an optimal strategy.
+Building games with artificial agents that learn how to play is a long-standing goal in Game-AI. In this work we focus on building an agent that learns to master the classical arcade game Bomberman with the help of reinforcment learning.\\ \\
+In the game Bomberman each agents finds itself in a grid of crates and walls and tries to win the game by collecting as many points as possible in each round.\\
+He can achieve this by planting bombs to destroy crates and collect coins or kill other agents. \\
+In a game like this, with a lot of options and strategies, it gets rather complicated to play the game and is therefore ideally suited to try solving the game by machine learning.\\ \\
+The reinforcement learning (RL) approach, used in this project, is ideally suited for teaching games to AIs as it gives the creator the opportunity to guide the agent into the desired direction by creating rewards and punishments for certain behaviours.\\ \\
+In this project we mainly focused on the Q-learning algorithm which learns the value of an action in a particular state and has been proven successful in endeavours like this many times. \\
+We further extended our model to a Deep Q-Network, which contains a Neural network to process the feature state of the agent. This gives the benefit of faster computation in an environment with a large feature state, as the classical Q-tables scales exponentially to the given input.\\ \\
+The code to our agents can be found on Github: \\
+\url{https://github.com/bGuenes/bomberman_MLE_homework} \\ \\
+Our model handed in to the tournament is called "agent the destroyer of worlds 2" and is a Neural Network with three convolutions and one linear input layer in parallel, followed by four parallel linear inputs, which then merge together into one fully connected layer and then go to the output layer. The structure of the Network is explained in more detail in section \ref{NetworkS}. \\
+The agent "destroyer of students" is based on the same network structure, but with a vision field of 9x9 instead of 7x7.\\
+In test before the deadline the agent with the smaller vision field performed best and was therefore handed in.\\
+The remaining agents in the repository are predecessors with a simpler Network structure containing just one hidden linear layer.
 
-\item[Deep Q-Networks (DQN):] DQN extends Q-learning by employing deep neural networks 
-to approximate the Q-value function. This technique has been successful in handling 
-complex and high-dimensional state spaces, making it a strong candidate for Bomberman.
+\newpage
+\fancyhead[R]{Leonie Boland}
+\subsection{Related Work}
 
-\item[Policy Gradient Methods:] Policy gradient methods aim to directly learn a policy 
-that specifies the agent's actions in different game states. This approach can be 
-effective in scenarios where the optimal policy is not easily represented by a value function, 
-as it allows for a more flexible and direct mapping from states to actions.
-
-\item[Proximal Policy Optimization (PPO):] PPO is a state-of-the-art RL algorithm that focuses 
-on optimizing policy functions. It offers stability and strong performance in challenging 
-environments, making it suitable for Bomberman's dynamic and adversarial setting.
-
-\item[Actor-Critic Methods:] Actor-critic methods combine value-based and policy-based approaches, 
-leveraging both a critic (value function) and an actor (policy). This combination can provide the 
-agent with a more robust learning framework, enhancing its decision-making capabilities.
-
-In the pursuit of solving Bomberman with an AI agent, the selection and fine-tuning 
-of the appropriate RL technique, as well as the integration of domain-specific features, will 
-play pivotal roles in achieving success. This endeavor not only serves as a compelling testbed for 
-reinforcement learning but also has the potential to elevate the overall gaming experience 
-by delivering AI opponents that are challenging, adaptive, and engaging.
-\end{description}
+- deep q learning in RL growth, applicable in various domains, video games, robotics, decision making processes\\
+- basis for deep q learning in paper that plays 7 atari 2600 games with deep q learning, with outstanding results, three even surpassing human expert \\% https://arxiv.org/abs/1312.5602
+- most popular ai game is chess, AlphaZero was developed based on AlphaGo Zero, gets more generic, AlphaGo Zero already works with deep neural networks and a tabula rasa reinforcement learning algorithm as well as Monte Carlo Tree Search algortihm for the rules to use it for more games than just go, namely chess and shogi \\% https://arxiv.org/pdf/1712.01815.pdf  %https://discovery.ucl.ac.uk/id/eprint/10045895/1/agz_unformatted_nature.pdf
+- hybrid approach with dql is promising in different sytle games
+- propose an improvement to Q-Learning because of flaw of overestimating action values, namely double q-learning \\%https://arxiv.org/pdf/1509.06461.pdf
+- this is then used for training a mario playing agent \\%https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html
+- ppo algorithms alternate between sampling data through interaction with the environment and optimizing an objective function, enabling multiple epochs of minibatch updates, using stochastic gradient ascent, experiments not only simulated robotic locomotion but also atari game, successfully\\ %https://arxiv.org/abs/1707.06347
+- bomberman for rl has been studied before as well, imitation-based learner improving with actor-critic (value-based and policy-based) proximal policy optimization method, compared to only ppo with either multi-layer perceptron or a long short term memory network\\%https://inria.hal.science/hal-03652029/document
