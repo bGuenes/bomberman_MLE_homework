@@ -19,6 +19,56 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global}
+    \entry{Onl:qtabledis}{online}{}
+      \name{author}{1}{}{%
+        {{hash=9d2ea3506b1121365e5eec24c92c528d}{%
+           family={baeldung},
+           familyi={b\bibinitperiod}}}%
+      }
+      \strng{namehash}{9d2ea3506b1121365e5eec24c92c528d}
+      \strng{fullhash}{9d2ea3506b1121365e5eec24c92c528d}
+      \strng{bibnamehash}{9d2ea3506b1121365e5eec24c92c528d}
+      \strng{authorbibnamehash}{9d2ea3506b1121365e5eec24c92c528d}
+      \strng{authornamehash}{9d2ea3506b1121365e5eec24c92c528d}
+      \strng{authorfullhash}{9d2ea3506b1121365e5eec24c92c528d}
+      \field{sortinit}{b}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Q-Learning vs. Deep Q-Learning}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://www.baeldung.com/cs/q-learning-vs-deep-q-learning-vs-deep-q-network#:~:text=One%20of%20the%20main%20drawbacks,to%20store%20the%20Q%2Dvalues.
+      \endverb
+      \verb{url}
+      \verb https://www.baeldung.com/cs/q-learning-vs-deep-q-learning-vs-deep-q-network#:~:text=One%20of%20the%20main%20drawbacks,to%20store%20the%20Q%2Dvalues.
+      \endverb
+    \endentry
+    \entry{Onl:crossentr}{online}{}
+      \name{author}{1}{}{%
+        {{hash=7f5bdcac2c3a7916096c8a5eb2dde9cd}{%
+           family={educative},
+           familyi={e\bibinitperiod}}}%
+      }
+      \strng{namehash}{7f5bdcac2c3a7916096c8a5eb2dde9cd}
+      \strng{fullhash}{7f5bdcac2c3a7916096c8a5eb2dde9cd}
+      \strng{bibnamehash}{7f5bdcac2c3a7916096c8a5eb2dde9cd}
+      \strng{authorbibnamehash}{7f5bdcac2c3a7916096c8a5eb2dde9cd}
+      \strng{authornamehash}{7f5bdcac2c3a7916096c8a5eb2dde9cd}
+      \strng{authorfullhash}{7f5bdcac2c3a7916096c8a5eb2dde9cd}
+      \field{sortinit}{e}
+      \field{sortinithash}{8da8a182d344d5b9047633dfc0cc9131}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{What is cross-entropy loss in PyTorch?}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://www.educative.io/answers/what-is-cross-entropy-loss-in-pytorch
+      \endverb
+      \verb{url}
+      \verb https://www.educative.io/answers/what-is-cross-entropy-loss-in-pytorch
+      \endverb
+    \endentry
     \entry{Img:autoencoder}{misc}{}
       \name{author}{1}{}{%
         {{hash=a0801247a21be0dab4862955ad4211d0}{%
@@ -40,6 +90,201 @@
       \field{note}{\url{https://www.compthree.com/blog/autoencoder/}}
       \field{title}{Variational Autoencoders are Beautiful}
       \field{year}{2019}
+    \endentry
+    \entry{Onl:greedy}{online}{}
+      \name{author}{1}{}{%
+        {{hash=588510156769abe9fe640c717e679cd6}{%
+           family={paperswithcode},
+           familyi={p\bibinitperiod}}}%
+      }
+      \strng{namehash}{588510156769abe9fe640c717e679cd6}
+      \strng{fullhash}{588510156769abe9fe640c717e679cd6}
+      \strng{bibnamehash}{588510156769abe9fe640c717e679cd6}
+      \strng{authorbibnamehash}{588510156769abe9fe640c717e679cd6}
+      \strng{authornamehash}{588510156769abe9fe640c717e679cd6}
+      \strng{authorfullhash}{588510156769abe9fe640c717e679cd6}
+      \field{extraname}{1}
+      \field{sortinit}{p}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Epsilon Greedy Exploration}
+      \field{year}{2019}
+      \verb{urlraw}
+      \verb https://paperswithcode.com/method/epsilon-greedy-exploration
+      \endverb
+      \verb{url}
+      \verb https://paperswithcode.com/method/epsilon-greedy-exploration
+      \endverb
+    \endentry
+    \entry{Onl:replaybuff}{online}{}
+      \name{author}{1}{}{%
+        {{hash=588510156769abe9fe640c717e679cd6}{%
+           family={paperswithcode},
+           familyi={p\bibinitperiod}}}%
+      }
+      \strng{namehash}{588510156769abe9fe640c717e679cd6}
+      \strng{fullhash}{588510156769abe9fe640c717e679cd6}
+      \strng{bibnamehash}{588510156769abe9fe640c717e679cd6}
+      \strng{authorbibnamehash}{588510156769abe9fe640c717e679cd6}
+      \strng{authornamehash}{588510156769abe9fe640c717e679cd6}
+      \strng{authorfullhash}{588510156769abe9fe640c717e679cd6}
+      \field{extraname}{2}
+      \field{sortinit}{p}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Experience Replay}
+      \field{year}{2017}
+      \verb{urlraw}
+      \verb https://paperswithcode.com/method/experience-replay
+      \endverb
+      \verb{url}
+      \verb https://paperswithcode.com/method/experience-replay
+      \endverb
+    \endentry
+    \entry{Onl:pytorch}{online}{}
+      \name{author}{1}{}{%
+        {{hash=edf7dd0dd9dbc3b022a1ef1fdb134ea1}{%
+           family={Pytorch},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{fullhash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{bibnamehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{authorbibnamehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{authornamehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{authorfullhash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \field{extraname}{1}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Pytorch}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://pytorch.org/
+      \endverb
+      \verb{url}
+      \verb https://pytorch.org/
+      \endverb
+    \endentry
+    \entry{Art:torchQlearn}{online}{}
+      \name{author}{1}{}{%
+        {{hash=edf7dd0dd9dbc3b022a1ef1fdb134ea1}{%
+           family={Pytorch},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{fullhash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{bibnamehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{authorbibnamehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{authornamehash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \strng{authorfullhash}{edf7dd0dd9dbc3b022a1ef1fdb134ea1}
+      \field{extraname}{2}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{REINFORCEMENT LEARNING (DQN) TUTORIAL}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+      \endverb
+      \verb{url}
+      \verb https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+      \endverb
+    \endentry
+    \entry{Onl:autoencoder}{online}{}
+      \name{author}{1}{}{%
+        {{hash=a5fc2e9b044e4e2fab93315053a7ec2c}{%
+           family={Saalmann},
+           familyi={S\bibinitperiod},
+           given={Elias},
+           giveni={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{a5fc2e9b044e4e2fab93315053a7ec2c}
+      \strng{fullhash}{a5fc2e9b044e4e2fab93315053a7ec2c}
+      \strng{bibnamehash}{a5fc2e9b044e4e2fab93315053a7ec2c}
+      \strng{authorbibnamehash}{a5fc2e9b044e4e2fab93315053a7ec2c}
+      \strng{authornamehash}{a5fc2e9b044e4e2fab93315053a7ec2c}
+      \strng{authorfullhash}{a5fc2e9b044e4e2fab93315053a7ec2c}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Einführung in Autoencoder und Convolutional Neural Networks}
+      \field{year}{2018}
+      \verb{urlraw}
+      \verb https://dbs.uni-leipzig.de/file/Saalmann_Ausarbeitung.pdf
+      \endverb
+      \verb{url}
+      \verb https://dbs.uni-leipzig.de/file/Saalmann_Ausarbeitung.pdf
+      \endverb
+    \endentry
+    \entry{Onl:dataAug}{online}{}
+      \name{author}{1}{}{%
+        {{hash=1d985a9a67d9228272b6faec98918a54}{%
+           family={saturncloud},
+           familyi={s\bibinitperiod}}}%
+      }
+      \strng{namehash}{1d985a9a67d9228272b6faec98918a54}
+      \strng{fullhash}{1d985a9a67d9228272b6faec98918a54}
+      \strng{bibnamehash}{1d985a9a67d9228272b6faec98918a54}
+      \strng{authorbibnamehash}{1d985a9a67d9228272b6faec98918a54}
+      \strng{authornamehash}{1d985a9a67d9228272b6faec98918a54}
+      \strng{authorfullhash}{1d985a9a67d9228272b6faec98918a54}
+      \field{sortinit}{s}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Data Augmentation in PyTorch: A Comprehensive Guide for Data Scientists}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://saturncloud.io/blog/data-augmentation-in-pytorch-a-comprehensive-guide-for-data-scientists/#:~:text=Data%20augmentation%20is%20a%20technique,or%20changing%20the%20color%20scheme.
+      \endverb
+      \verb{url}
+      \verb https://saturncloud.io/blog/data-augmentation-in-pytorch-a-comprehensive-guide-for-data-scientists/#:~:text=Data%20augmentation%20is%20a%20technique,or%20changing%20the%20color%20scheme.
+      \endverb
+    \endentry
+    \entry{Art:Overfitting}{article}{}
+      \name{author}{1}{}{%
+        {{hash=bf827576bc08bcbef835217a69df8fb2}{%
+           family={Ying},
+           familyi={Y\bibinitperiod},
+           given={Xue},
+           giveni={X\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IOP Publishing}%
+      }
+      \strng{namehash}{bf827576bc08bcbef835217a69df8fb2}
+      \strng{fullhash}{bf827576bc08bcbef835217a69df8fb2}
+      \strng{bibnamehash}{bf827576bc08bcbef835217a69df8fb2}
+      \strng{authorbibnamehash}{bf827576bc08bcbef835217a69df8fb2}
+      \strng{authornamehash}{bf827576bc08bcbef835217a69df8fb2}
+      \strng{authorfullhash}{bf827576bc08bcbef835217a69df8fb2}
+      \field{sortinit}{Y}
+      \field{sortinithash}{fd67ad5a9ef0f7456bdd9aab10fe1495}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Physics: Conference Series}
+      \field{month}{2}
+      \field{number}{2}
+      \field{title}{An Overview of Overfitting and its Solutions}
+      \field{volume}{1168}
+      \field{year}{2019}
+      \field{pages}{022022}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1088/1742-6596/1168/2/022022
+      \endverb
+      \verb{urlraw}
+      \verb https://dx.doi.org/10.1088/1742-6596/1168/2/022022
+      \endverb
+      \verb{url}
+      \verb https://dx.doi.org/10.1088/1742-6596/1168/2/022022
+      \endverb
     \endentry
   \enddatalist
 \endrefsection
