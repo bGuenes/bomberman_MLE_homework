@@ -4,218 +4,148 @@ In this section, we elucidate our methodology and approaches concerning the vari
 that we have developed for the Bomberman game agent. We will also substantiate what has proven effective, articulate 
 the concepts we have discarded, and expound upon the rationale for ultimately selecting the model we have submitted.
 
-\subsection{Q-learning}
 
-Reinforcement learning (RL) is a subfield of machine learning that focuses on training agents to make a decision given a state representation of the world through trial and error, aiming to maximize a cumulative reward. Q-learning is a fundamental RL algorithm that has played a pivotal role in solving various problems in robotics, gaming, and more. In this section, we will introduce Q-learning and then focus on Deep Q-Networks (DQNs), explaining how they differ from traditional Q-tables.
+\subsection{Deep Q-Learning Agent}
 
-\subsubsection{Q-Learning}
+In the end, this project was the better one out of the two projects we had to develop. We didn't make the decision lightly. 
+But this model utilizes 100\% deep Q-learning and does not imitate any other rule-based agent like the approach in the second project did.
 
-Q-learning is a model-free reinforcement learning algorithm that learns an action-value function, denoted as \(Q(s, a)\), where 's' represents the state, and 'a' represents the action. The Q-value of a state-action pair quantifies the expected cumulative reward an agent can achieve starting from that state and taking a specific action. The primary goal of Q-learning is to find the optimal policy, which is a mapping of states to actions that maximizes the expected cumulative reward over time.
 
-The Q-learning algorithm updates Q-values iteratively through the following equation:
+\subsubsection{Data Collection}
 
-\begin{equation}
-	Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ r_t + \gamma \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right]
-\end{equation}
+To optimize the agent's learning of Bomberman efficiently later on, we decided to use a \verb|ReplayMemory|, also known as a \verb|ReplayBuffer|. 
 
-Here, \(s_t\) represents the current state, \(a_t\) is the chosen action, \(r_t\) is the immediate reward received, \(\gamma\) is the discount factor, and \(\alpha\) is the learning rate.
+During each step in the \verb|game_events_occurred|function, game transitions are collected and stored in the \verb|ReplayMemory|.
+After each round in the \verb|end_of_round| function, 
+our model is trained using these data. The advantage of using this concept of a \verb|ReplayMemory| is that it allows effective adjustment of 
+batch sizes and the generation of random samples. This enables data shuffling, preventing the model from learning dependencies between the data. 
+Here is a code snippet of our ReplayMemory:
 
-Q-learning operates in discrete state and action spaces, making it highly suitable for problems where these spaces are well-defined, such as board games and simple robotic tasks. However, Q-learning faces limitations when dealing big feature spaces as the Q-tables grow exponentially, which led to the development of Deep Q-Networks (DQNs).
+\begin{lstlisting}[language=Python]
 
-\subsubsection{Deep Q-Networks}
+class ReplayMemory(object):
+    def __init__(self, capacity):
+        self.memory = deque([], maxlen=capacity)
+        self.rewards = [0]
+        self.scores = [0]
+        self.mean_rewards = [0]
+        self.survival_list = [0]
 
-Deep Q-Networks (DQNs) are a class of neural network-based reinforcement learning algorithms that combine deep learning with Q-learning principles. They address the limitations of Q-learning by approximating the Q-value function using a neural network instead of a Q-table. This enables DQNs to handle complex and continuous state spaces, making them highly effective in tasks like image-based game playing and autonomous driving.
+    def push(self, *args):
+        """Save a transition"""
+        self.memory.append(Transition(*args))
 
-Key differences between DQNs and traditional Q-tables include:
+    def sample(self, batch_size):
+        return random.sample(self.memory, batch_size)
+    
+    ...
 
-\begin{enumerate}
-	\item \textbf{Function Approximation}: DQNs use a neural network to approximate the Q-values, allowing them to generalize across similar states. Traditional Q-learning relies on a discrete Q-table, which is not practical for large state spaces.
-	
-	\item \textbf{Experience Replay}: DQNs store experiences (state, action, reward, next state) in a replay buffer and sample mini-batches during training. This stabilizes learning by breaking the temporal correlation between experiences and mitigating the risk of convergence to suboptimal policies.
-	
-	\item \textbf{Target Network}: To stabilize training, DQNs use two networks: the target network and the policy network. The target network lags behind the policy network, and its Q-values are used as targets for training. This helps in reducing the variance of Q-value estimates during training.
-\end{enumerate}
+    def __len__(self):
+    return len(self.memory)  
 
-% ----------------------------------------------------------------------------------------------------------------------------------------------
+\end{lstlisting}
 
-\subsection{Neural Networks}
-Neural networks, often referred to as artificial neural networks (ANNs), are a class of machine learning models inspired by the structure and function of the human brain. They have gained significant popularity in recent years due to their remarkable ability to learn and generalize from data, making them versatile tools for a wide range of tasks, from image recognition to natural language processing. While they have been around for a rather long time, it was only in the recent decade that computational power became sufficient to train networks that are large enough to be useful. Also, the amount of available data for training has dramatically increased over the years.
+The push function is used to store game transitions in the memory, including the current state, the next state, the current action, and the 
+reward. We have used a batch size of 200, and the memory can store up to 10,000 elements before the oldest elements 
+are removed when new ones are pushed. These values are not chosen arbitrarily but have proven to be the most effective for us 
+after extensive experimentation. With a batch size of 32, our model took too long to perform well, and beyond 200, it seemed to achieve a 
+similar speed as 500. However, we did not want to go higher, as it would have resulted in decreased accuracy.
 
-\subsubsection{Basic Structure of a Neural Network}
+\subsubsection{State Representation} \label{InFeatures}
 
-At its core, a neural network is composed of interconnected nodes, known as neurons or artificial neurons, organized into layers. The three primary types of layers in a neural network are:
+It is important to preprocess the input to the Neural Network, else it would be difficult for the Network to determine the important parts out of the big feature state that is provided by the game environment.\\
+We decided to limit the vision of the agent to a surrounding of a 7x7 grid. This gives the benefit of being able to train the agent on different game sizes and being able to scale the game without the agent losing information.\\ \\
+Since Neural networks prefer working with ones and zeros we tried to separate each information as much as possible and not cramp all available informations into one array with different numbers.\\
+Therefore we created three 7x7 arrays, that contain -1 for one type of information on that field and 1 for another. So one array has -1 for walls and 1 for crates, the second array has -1 for explosions and 1 for coins and the third array contains -1 for bombs and their range and 1 for opponents.\\
+To give the agent a chance to have a sense for whats outside of his narrow world view, we implemented a 4x4 array that contains informations, whether there is a coin, crate, explosion/bomb or opponent to the right, left, top or bottom of the agent.\\ \\
+So the input to our neural network contains three 7x7 arrays with a vision of its surroundings and a 4x4 array with an outside view.
+To have a better understanding of that you can see the concept of our \verb|sate_to_feature| function here:
 
-\begin{enumerate}
-	\item \textbf{Input Layer}: This layer consists of neurons that receive the initial data or features. Each neuron corresponds to a specific feature, and its value represents the magnitude of that feature.
-	
-	\item \textbf{Hidden Layers}: Hidden layers are intermediary layers between the input and output layers. They process the input data through a series of weighted connections and nonlinear activation functions.
-	
-	\item \textbf{Output Layer}: The output layer produces the final results or predictions of the neural network's task. The number of neurons in this layer depends on the problem, with each neuron typically corresponding to a different class or a particular aspect of the prediction.
-\end{enumerate}
+\begin{figure}[H]
+    \centering
+    
+    \includegraphics[width=\oneImgWidth]{images/chartFinalProjStates}%
+    
+    \captionadjust%
+    \caption{\label{fig:chartFinalProjStates} Basic concept of the state to features function.
+    }%
+\end{figure}
 
-\subsubsection{Working Principle of Neurons}
+\subsubsection{Model Architecture} \label{NetworkS}
 
-Each neuron in a neural network performs a simple but crucial task. It takes in a weighted sum of its inputs, adds a bias term, and passes this value through an activation function to produce an output, thus each neuron in the network has a number of free parameters that need to be determined by training. The equation for the operation of a neuron is be defined as:
+A significant part to how well the agent performs and its dependencies to learn are defined by its Neural Network structure.
+We tried different approaches to determine what gives the agent the best possibility to master the game.
+Our final agent has a Network that takes in four tensors and has an individual pipeline for each of these tensors in the first two layers. Afterwards they get connected into one fully connected layer before they connect to the output layer.\\
+As described in \ref{InFeatures} we give our network three arrays with a 7x7 view around the agent. These array go each through a convolutional layer and get each passed into their own linear layer before they all get connected in the layer before the output.\\ \\
+The idea behind this network structure is to let the network first process all informations on crates, walls, coins, bombs, explosions and opponents independently, before everything gets mushed together.
+To have a better understanding of that you can see the code snippet below: 
 
-\begin{equation}
-	\text{Output} = \text{Activation}\left(\sum_{i=1}^{n} (\text{Input}_i \times \text{Weight}_i) + \text{Bias}\right)
-\end{equation}
+\begin{lstlisting}[language=Python]
 
-\subsubsection{Training a Neural Network}
+class DQN(nn.Module):
+    def __init__(self, n_actions):
+        super(DQN, self).__init__()
 
-The essence of neural networks lies in their ability to approximate any function, and thus "learn" a relation between input and output data, no matter how complex this relationship might be. This learning process involves adjusting the weights and biases of the neurons to minimize a specific loss or error function. Here's an overview of the training process:
+        self.input1 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input2 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input3 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input4 = nn.Linear(16, 12)
 
-\begin{enumerate}
-	\item \textbf{Forward Pass}: During the forward pass, input data is propagated through the network layer by layer. Neurons compute their outputs using the weighted sum and activation function.
-	
-	\item \textbf{Loss Calculation}: The output of the neural network is compared to the ground truth or target values, and a loss (error) is calculated. The choice of loss function depends on the task. A few different examples are given in \ref{loss}.
-	
-	\item \textbf{Backpropagation}: In the backpropagation step, the gradient of the loss with respect to the network's parameters (weights and biases) is computed using the chain rule. This gradient indicates how much each parameter should be adjusted to minimize the loss.
-	
-	\item \textbf{Optimization}: The gradients are used to update the network's parameters in the opposite direction of the gradient. This process is repeated iteratively until the loss converges to a minimum.
-\end{enumerate}
+        self.hidden11 = nn.Linear(25, 18)
+        self.hidden12 = nn.Linear(25, 18)
+        self.hidden13 = nn.Linear(25, 18)
+        self.hidden14 = nn.Linear(12, 6)
 
-\subsubsection{Batch Normalization}
+        self.hidden2 = nn.Linear(60, 30)
 
-Batch Normalization is a widely used technique in deep learning, specifically designed to address training instability and accelerate convergence in neural networks. It operates by normalizing the activations of each layer within mini-batches during training and introduce learnable parameters (scale and shift) to allow the network to adapt and fine-tune the normalized activations.
-These are then passed through the activation function and used in subsequent layers for forward and backward passes.
-\\ \\
-\textbf{Advantages of Batch Normalization:} \\
-Batch Normalization helps mitigate issues like vanishing and exploding gradients, making it easier to train deep networks. By normalizing the activations, it maintains a more consistent and stable gradient flow during backpropagation.
-Neural networks with Batch Normalization also tend to converge faster. The normalization of activations helps prevent the network from getting stuck in plateaus, enabling quicker convergence to a better solution.
-Batch Normalization introduces a degree of regularization by reducing internal covariate shift (the change in the distribution of activations between layers). This often leads to better generalization and reduced overfitting.
+        self.output = nn.Linear(30, n_actions)
 
 
-% ----------------------------------------------------------------------------------------------------------------------------------------------
-\newpage
-\subsection{Optimizer}
+    # Called with either one element to determine next action, or a batch
+    # during optimization. Returns tensor([[left0exp,right0exp]...]).
+    def forward(self, x1, x2, x3, x4):
 
-In machine learning, optimization plays a vital role in training deep neural networks. Optimizers are algorithms responsible for adjusting the model's parameters to minimize a loss function during training. They control how the model learns and, consequently, impact its convergence speed and overall performance. Two popular optimizers used in deep learning are RMSprop and AdamW. In this section, we will explain the role of optimizers and delve into the mechanisms of RMSprop and AdamW.
+        x1 = F.relu(self.input1(x1))
+        x2 = F.relu(self.input2(x2))
+        x3 = F.relu(self.input3(x3))
+        x4 = F.relu(self.input4(x4))
 
-Optimizers in machine learning are responsible for updating the weights and biases of a neural network to minimize a chosen loss function. The primary goal is to find the optimal set of parameters that result in the lowest possible loss. This is achieved through an iterative process that involves computing gradients of the loss with respect to the model's parameters and adjusting these parameters in the direction that reduces the loss.
+        x1 = F.relu(self.hidden11(x1.view(x1.size(0), -1)))
+        x2 = F.relu(self.hidden12(x2.view(x2.size(0), -1)))
+        x3 = F.relu(self.hidden13(x3.view(x3.size(0), -1)))
+        x4 = F.relu(self.hidden14(x4.view(x4.size(0), -1)))
 
-\subsubsection{RMSprop}
+        x = torch.cat((x1, x2, x3, x4), dim=1)
+        x = F.relu(self.hidden2(x))
 
-RMSprop (Root Mean Square Propagation) is an adaptive learning rate optimizer designed to address the issue of slow convergence in stochastic gradient descent (SGD) and is defined by:
+        x = self.output(x)
 
+        return x
 
-\begin{align}
-	v_t &= \beta \cdot v_{t-1} + (1 - \beta) \cdot (\nabla J(\theta_t))^2 
-	\\
-	\theta_{t+1} &= \theta_t - \frac{\alpha}{\sqrt{v_t + \epsilon}} \cdot \nabla J(\theta_t)
-\end{align}    
+\end{lstlisting}
 
-Where \(v_t\) describes the moving average of squared gradients, \(\beta\) the decay rate for the moving average (usually set to a value like 0.9), \(\nabla J(\theta_t)\) represents the gradient of the loss with respect to the model parameters \(\theta_t\), \(\alpha\) is the learning rate and\(\epsilon\) is a small constant (typically used to avoid division by zero).
+\noindent Note that we use the object oriented implementation to create the neuronal network 
+using Pytorch.
 
-RMSprop works by maintaing a moving average of squared gradients for each parameter. It then adapts the learning rates individually for each parameter by dividing the current gradient by the square root of the moving average of squared gradients.
-This adaptation helps to scale down the learning rate for parameters with high variance in gradients and scale up the learning rate for those with low variance.
-RMSprop includes a smoothing term to avoid dividing by very small values, ensuring stable convergence.
+\subsubsection{Loss Function and Optimizer}
 
-RMSprop is well-suited for tasks with non-stationary objectives or sparse data. It helps mitigate the vanishing and exploding gradient problems and often converges faster than traditional SGD.
+For our best model we used the RMSprop optimizer and the MSE loss function. In the end 
+we tried a lot of the available optimizers and loss functions available in PyTorch 
+in all combinations. But this choice was the best for us. The reason why that could be is
+that playing Bomberman involves complex decision-making processes where the agent needs to understand the game environment, 
+make strategic choices, and optimize its gameplay to win. MSE loss helps in refining these decisions, emphasizing the importance of predicting the 
+exact or close-to-exact values for various actions or states in the game. But what we also observed is that the MSE loss sometimes 
+fluctuates significantly, which was frustrating at times, especially when the model was saved at a moment when the loss function was oscillating 
+in an unfavorable direction. Nevertheless, the MSE loss was still able to converge best towards zero.\\
 
-\subsubsection{AdamW}
-
-AdamW (Adam with Weight Decay) is a variant of the Adam optimizer that addresses weight decay issues. AdamW incorporates L2 regularization (weight decay) directly into the parameter update step, unlike the original Adam optimizer, which applies weight decay as an additional term after the parameter update. It is defined by:
-
-\begin{align}
-	m_t &= \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot \nabla J(\theta_t) \\
-	v_t &= \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot (\nabla J(\theta_t))^2 \\
-	\hat{m}_t &= \frac{m_t}{1 - \beta_1^t} \\
-	\hat{v}_t &= \frac{v_t}{1 - \beta_2^t} \\
-	\theta_{t+1} &= \theta_t - \frac{\alpha}{\sqrt{\hat{v}_t + \epsilon}} \cdot \hat{m}_t - \lambda \cdot \theta_t
-\end{align}
-
-Where \(m_t\) and \(v_t\) are the first and second moments of gradients, respectively, \(\beta_1\) and \(\beta_2\) are the exponential decay rates for the first and second moments (typically set to values like 0.9 and 0.999), \(\hat{m}_t\) and \(\hat{v}_t\) are bias-corrected estimates of the moments, \(\nabla J(\theta_t)\) represents the gradient of the loss with respect to the model parameters \(\theta_t\), \(\alpha\) is the learning rate, \(\epsilon\) is a small constant and \(\lambda\) is the weight decay term, which adds L2 regularization to the parameter updates. \\
-AdamW computes the gradients of the loss and updates the moving averages of the first and second moments of gradients.
-It then includes an L2 regularization term in the parameter update step, which helps prevent overfitting.
-By integrating weight decay, AdamW offers better generalization and improved performance in tasks with large neural networks.\\
-
-AdamW is generally well-suited for a wide range of deep learning tasks and is particularly effective when dealing with large networks and complex datasets.
-
-\subsubsection{Choosing the Right Optimizer}
-
-The choice between RMSprop and AdamW depends on the specific characteristics of the deep learning task:
-
-\begin{itemize}
-	\item \textbf{RMSprop}: When dealing with non-stationary objectives, sparse data, or tasks where adaptive learning rates are crucial. It can help in scenarios where the learning rate needs to vary across parameters.
-	
-	\item \textbf{AdamW}: When you require effective regularization through weight decay, especially in large neural networks with many parameters. It is suitable for tasks where preventing overfitting is a top priority.
-\end{itemize}
-
-In practice, experimenting with both optimizers on the specific dataset and model architecture is often the best way to determine which one performs better for the task.
-
-% ----------------------------------------------------------------------------------------------------------------------------------------------
-\newpage
-\subsection{Loss Functions} \label{loss}
-
-Loss functions play a crucial role in training neural networks. They quantify the difference between the predicted outputs of the model and the ground truth labels. Different loss functions are used for different types of tasks and data.
-
-\subsubsection{Cross-Entropy Loss} \label{sec:crossentropy}
-
-Cross-entropy loss, often used in classification tasks, measures the dissimilarity between predicted class probabilities and the true class labels. It is particularly suitable for problems where the outputs are probability distributions.
-
-The equation for binary cross-entropy loss for a single example is:
-
-\begin{align}
-	\text{Binary Cross-Entropy Loss} = -\left(y \log(\hat{y}) + (1 - y) \log(1 - \hat{y})\right)
-\end{align}
-
-Preferred Use Case: Cross-entropy loss is commonly used in classification tasks, including image classification and natural language processing.
-
-\subsubsection{Huber Loss}
-
-Huber loss is a robust loss function that combines the best properties of Mean Absolute Error (MAE) and Mean Squared Error (MSE) loss functions. It is less sensitive to outliers and provides a smoother gradient compared to MSE.
-
-The Huber loss is defined as:
-
-\begin{align}
-	\text{Huber Loss} = \begin{cases}
-		\frac{1}{2}(\hat{y} - y)^2, & \text{if } |\hat{y} - y| \leq \delta \\
-		\delta|\hat{y} - y| - \frac{1}{2}\delta^2, & \text{otherwise}
-	\end{cases}
-\end{align}
-
-Preferred Use Case: Huber loss is useful when dealing with regression problems where the dataset may contain outliers.
-
-\subsubsection{Mean Squared Error (MSE) Loss}
-
-Mean Squared Error (MSE) loss is a common loss function used for regression tasks. It measures the average squared difference between predicted and true values.
-
-The equation for MSE loss is:
-
-\begin{align}
-	\text{MSE Loss} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2    
-\end{align}
-
-Preferred Use Case: MSE loss is suitable for regression problems where the goal is to minimize the squared difference between predicted and true values.
-
-\subsubsection{Smooth L1 Loss}
-
-Smooth L1 loss is another loss function for regression that combines the best of both MAE and MSE. It is less sensitive to outliers than MSE and provides a smooth gradient.
-
-The equation for Smooth L1 loss is:
-
-\begin{align}
-	\text{Smooth L1 Loss} = \begin{cases}
-		0.5(\hat{y} - y)^2, & \text{if } |x| < 1 \\
-		|x| - 0.5, & \text{otherwise}
-	\end{cases}    
-\end{align}
-
-Preferred Use Case: Smooth L1 loss is suitable for regression problems, especially when dealing with data that may contain outliers.
-
-\subsubsection{Optimal Loss Function for Bomberman}
-
-Selecting the most suitable loss function for reinforcement learning in the context of playing the arcade game Bomberman requires careful consideration of the game's dynamics and objectives.\\
-Cross-entropy loss is typically used for classification tasks and may not be the most appropriate choice for Bomberman. It focuses on estimating class probabilities, which may not align well with the continuous and dynamic nature of the game. \\
-The Huber loss is designed to be robust to outliers, which could be beneficial in Bomberman, as the agent may encounter unexpected scenarios and rewards. However, it is primarily used for regression tasks, and its effectiveness in reinforcement learning settings might vary. \\
-MSE loss measures the squared difference between predicted and target values. In the context of Bomberman, where the agent's goal is to maximize cumulative rewards, using MSE loss could lead to convergence issues. It tends to focus on minimizing deviations from the target, which might not be the primary objective in a dynamic game like Bomberman. \\
-Smooth L1 loss combines the benefits of both Huber and MSE losses. It provides a smooth gradient and is less sensitive to outliers. For Bomberman, where the agent needs to balance exploration and exploitation, Smooth L1 loss could be a reasonable choice, as it encourages stable learning without being overly sensitive to small fluctuations in rewards.
+For the optimizer could be the reason that RMSprop ensures that the learning process remains stable and responsive to the changing dynamics 
+of the game environment. It prevents the model from getting stuck in local minima and helps it explore the solution space effectively.
+But the same applies to the AdamW optimizer, which, according to our own research, is even supposed to be slightly better than RMSprop. 
+However, in the end, RMSprop worked best for us; we were able to see at least a small improvement in our agent's performance in the game.
 
 \newpage
 \fancyhead[R]{Kevin Klein}
-
-\subsection{Our second best model (second project)}
+\subsection{Imitation-based RL Agent}
 
 In our quest to develop our second best model for Bomberman, we embarked on a journey where we collected data pairs of game 
 states and rule-based agent actions. Using this data, we trained a machine learning model, optimizing it to mimic 
@@ -236,7 +166,7 @@ We chose PyTorch~\cite{Onl:pytorch} as our primary library because it offers a f
 experiment with complex neural network architectures. Additionally, its extensive community support, rich ecosystem of pre-built modules, 
 and integration with GPU acceleration make it an ideal choice for achieving our goals efficiently.
 
-\subsubsection*{Data Collection}
+\subsubsection{Data Collection}
 
 In our data collection process, we began by generating extensive game data through multiple playthroughs of Bomberman with 
 our rule-based agent. During these sessions, we recorded both the game states and the corresponding actions taken by the agent, 
@@ -328,7 +258,7 @@ to enhance the diversity of our training samples and boost the model's generaliz
 To facilitate model training and evaluation, we divided the dataset into distinct sets for training, validation, 
 and testing purposes. This partitioning allowed us to gauge our model's performance on unseen data and make necessary adjustments.
 
-\subsubsection*{State Representation}
+\subsubsection{State Representation}
 
 \begin{figure}[tb]
     \centering
@@ -450,7 +380,7 @@ The encoder module was instrumental in feature learning, condensing the sparse d
 Additionally, it reduced dimensionality, enhancing computational efficiency and reducing noise in the data. During decoding, the network could 
 reconstruct the original 7x7 state representation from the compressed data, ensuring that no critical information was lost in the process.
 
-\subsubsection*{Model Architecture}
+\subsubsection{Model Architecture}
 
 \begin{figure}[H]
     \centering
@@ -481,7 +411,7 @@ Agent Network:
             Input1: 72, Hidden1: 64, Hidden2: 32, Hidden3: 16, Output1: 6
 \end{verbatim}
 
-\subsubsection*{Loss function and optimizer}
+\subsubsection{Loss function and optimizer}
 
 We have two models: the encoder network for further feature compression and the agent network, which is tasked with 
 learning how to play the game effectively. Additionally, the agent is initially meant to imitate the rule-based agent, which is 
@@ -500,7 +430,7 @@ For the agent network during deep Q-learning, we used the ADAM optimizer with a 
 It is designed to balance the benefits of mean squared error (MSE) and mean absolute error (MAE) loss functions.
 But for any reason was the MSE loss better for the encoder network than the Huber loss.
 
-\subsection{Other aproaches that we had}
+\subsection{Other aproaches}
 
 At the beginning of the project, we had several other ideas about how to construct our AI agent. One alternative idea was to use Q-tables. 
 For the coin collector agent, we considered the concept that it would only perceive one coin, specifically the one closest to it.

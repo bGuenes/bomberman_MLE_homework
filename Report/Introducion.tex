@@ -1,5 +1,4 @@
-
-\fancyhead[R]{Berkay Günes}
+\fancyhead[R]{Leonie Boland}
 %- problem\\
 %- brief overview of methods:\\
 %- Deep Q Learning give examples where its used (e.g. Mario)\\
@@ -15,9 +14,16 @@ In this project we mainly focused on the Q-learning algorithm which learns the v
 We further extended our model to a Deep Q-Network, which contains a Neural network to process the feature state of the agent. This gives the benefit of faster computation in an environment with a large feature state, as the classical Q-tables scales exponentially to the given input.\\ \\
 The code to our agents can be found on Github: \\
 \url{https://github.com/bGuenes/bomberman_MLE_homework} \\ \\
-Our model handed in to the tournament is called "agent the destroyer of worlds 2" and is a Neural Network with three convolutions and one linear input layer in parallel, followed by four parallel linear inputs, which then merge together into one fully connected layer and then go to the output layer. The structure of the Network is explained in more detail in section \ref{NetworkS}. \\
-The agent "destroyer of students" is based on the same network structure, but with a vision field of 9x9 instead of 7x7.\\
-In test before the deadline the agent with the smaller vision field performed best and was therefore handed in.\\
+Our model handed in to the tournament is called ``agent the destroyer of worlds 2'' and is a Neural Network with three convolutions and one linear input layer in parallel, followed by four parallel linear inputs, which then merge together into one fully connected layer and then go to the output layer. The structure of the Network is explained in more detail in section \ref{NetworkS}. \\
+The agent ``destroyer of students'' is based on the same network structure, but with a vision field of 9x9 instead of 7x7.\\
+
+\noindent Then we also worked on a second project that follows a slightly different approach than our main project. In the second project, 
+the goal is for the agent to first learn from the rule-based agent using classification, and then the agent should be further improved 
+using deep Q-learning. In the following, we will refer to the agent from our final project that we 
+submitted as the ``Deep Q-Learning Agent'', and the agent from our second project will be called the ``Imitation-based RL Agent''.
+You can find our second project in the Github repo called ``xsecond\_agent''.\\
+
+\noindent In test before the deadline the agent with the smaller vision field performed best and was therefore handed in.
 The remaining agents in the repository are predecessors with a simpler Network structure containing just one hidden linear layer.
 
 \newpage

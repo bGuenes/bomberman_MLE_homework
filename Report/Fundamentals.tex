@@ -1,0 +1,212 @@
+\fancyhead[R]{Berkay Günes}
+
+In this section, we provide a brief overview of the fundamental machine learning concepts that we 
+have applied in both projects. Here, we outline the key principles and techniques that form the foundation 
+of our machine learning implementations. These concepts serve as the building blocks for the approaches adopted in both projects
+
+\subsection{Q-learning}
+
+Reinforcement learning (RL) is a subfield of machine learning that focuses on training agents to make a decision given a state representation of the world through trial and error, aiming to maximize a cumulative reward. Q-learning is a fundamental RL algorithm that has played a pivotal role in solving various problems in robotics, gaming, and more. In this section, we will introduce Q-learning and then focus on Deep Q-Networks (DQNs), explaining how they differ from traditional Q-tables.
+
+\subsubsection{Q-Learning}
+
+Q-learning is a model-free reinforcement learning algorithm that learns an action-value function, denoted as \(Q(s, a)\), where 's' represents the state, and 'a' represents the action. The Q-value of a state-action pair quantifies the expected cumulative reward an agent can achieve starting from that state and taking a specific action. The primary goal of Q-learning is to find the optimal policy, which is a mapping of states to actions that maximizes the expected cumulative reward over time.
+
+The Q-learning algorithm updates Q-values iteratively through the following equation:
+
+\begin{equation}
+	Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ r_t + \gamma \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right]
+\end{equation}
+
+Here, \(s_t\) represents the current state, \(a_t\) is the chosen action, \(r_t\) is the immediate reward received, \(\gamma\) is the discount factor, and \(\alpha\) is the learning rate.
+
+Q-learning operates in discrete state and action spaces, making it highly suitable for problems where these spaces are well-defined, such as board games and simple robotic tasks. However, Q-learning faces limitations when dealing big feature spaces as the Q-tables grow exponentially, which led to the development of Deep Q-Networks (DQNs).
+
+\subsubsection{Deep Q-Networks}
+
+Deep Q-Networks (DQNs) are a class of neural network-based reinforcement learning algorithms that combine deep learning with Q-learning principles. They address the limitations of Q-learning by approximating the Q-value function using a neural network instead of a Q-table. This enables DQNs to handle complex and continuous state spaces, making them highly effective in tasks like image-based game playing and autonomous driving.
+
+Key differences between DQNs and traditional Q-tables include:
+
+\begin{enumerate}
+	\item \textbf{Function Approximation}: DQNs use a neural network to approximate the Q-values, allowing them to generalize across similar states. Traditional Q-learning relies on a discrete Q-table, which is not practical for large state spaces.
+	
+	\item \textbf{Experience Replay}: DQNs store experiences (state, action, reward, next state) in a replay buffer and sample mini-batches during training. This stabilizes learning by breaking the temporal correlation between experiences and mitigating the risk of convergence to suboptimal policies.
+	
+	\item \textbf{Target Network}: To stabilize training, DQNs use two networks: the target network and the policy network. The target network lags behind the policy network, and its Q-values are used as targets for training. This helps in reducing the variance of Q-value estimates during training.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------------------------------------------------------------------------
+
+\subsection{Neural Networks}
+Neural networks, often referred to as artificial neural networks (ANNs), are a class of machine learning models inspired by the structure and function of the human brain. They have gained significant popularity in recent years due to their remarkable ability to learn and generalize from data, making them versatile tools for a wide range of tasks, from image recognition to natural language processing. While they have been around for a rather long time, it was only in the recent decade that computational power became sufficient to train networks that are large enough to be useful. Also, the amount of available data for training has dramatically increased over the years.
+
+\subsubsection{Basic Structure of a Neural Network}
+
+At its core, a neural network is composed of interconnected nodes, known as neurons or artificial neurons, organized into layers. The three primary types of layers in a neural network are:
+
+\begin{enumerate}
+	\item \textbf{Input Layer}: This layer consists of neurons that receive the initial data or features. Each neuron corresponds to a specific feature, and its value represents the magnitude of that feature.
+	
+	\item \textbf{Hidden Layers}: Hidden layers are intermediary layers between the input and output layers. They process the input data through a series of weighted connections and nonlinear activation functions.
+	
+	\item \textbf{Output Layer}: The output layer produces the final results or predictions of the neural network's task. The number of neurons in this layer depends on the problem, with each neuron typically corresponding to a different class or a particular aspect of the prediction.
+\end{enumerate}
+
+\subsubsection{Working Principle of Neurons}
+
+Each neuron in a neural network performs a simple but crucial task. It takes in a weighted sum of its inputs, adds a bias term, and passes this value through an activation function to produce an output, thus each neuron in the network has a number of free parameters that need to be determined by training. The equation for the operation of a neuron is be defined as:
+
+\begin{equation}
+	\text{Output} = \text{Activation}\left(\sum_{i=1}^{n} (\text{Input}_i \times \text{Weight}_i) + \text{Bias}\right)
+\end{equation}
+
+\subsubsection{Training a Neural Network}
+
+The essence of neural networks lies in their ability to approximate any function, and thus "learn" a relation between input and output data, no matter how complex this relationship might be. This learning process involves adjusting the weights and biases of the neurons to minimize a specific loss or error function. Here's an overview of the training process:
+
+\begin{enumerate}
+	\item \textbf{Forward Pass}: During the forward pass, input data is propagated through the network layer by layer. Neurons compute their outputs using the weighted sum and activation function.
+	
+	\item \textbf{Loss Calculation}: The output of the neural network is compared to the ground truth or target values, and a loss (error) is calculated. The choice of loss function depends on the task. A few different examples are given in \ref{loss}.
+	
+	\item \textbf{Backpropagation}: In the backpropagation step, the gradient of the loss with respect to the network's parameters (weights and biases) is computed using the chain rule. This gradient indicates how much each parameter should be adjusted to minimize the loss.
+	
+	\item \textbf{Optimization}: The gradients are used to update the network's parameters in the opposite direction of the gradient. This process is repeated iteratively until the loss converges to a minimum.
+\end{enumerate}
+
+\subsubsection{Batch Normalization}
+
+Batch Normalization is a widely used technique in deep learning, specifically designed to address training instability and accelerate convergence in neural networks. It operates by normalizing the activations of each layer within mini-batches during training and introduce learnable parameters (scale and shift) to allow the network to adapt and fine-tune the normalized activations.
+These are then passed through the activation function and used in subsequent layers for forward and backward passes.
+\\ \\
+\textbf{Advantages of Batch Normalization:} \\
+Batch Normalization helps mitigate issues like vanishing and exploding gradients, making it easier to train deep networks. By normalizing the activations, it maintains a more consistent and stable gradient flow during backpropagation.
+Neural networks with Batch Normalization also tend to converge faster. The normalization of activations helps prevent the network from getting stuck in plateaus, enabling quicker convergence to a better solution.
+Batch Normalization introduces a degree of regularization by reducing internal covariate shift (the change in the distribution of activations between layers). This often leads to better generalization and reduced overfitting.
+
+
+% ----------------------------------------------------------------------------------------------------------------------------------------------
+\subsection{Optimizer}
+
+In machine learning, optimization plays a vital role in training deep neural networks. Optimizers are algorithms responsible for adjusting the model's parameters to minimize a loss function during training. They control how the model learns and, consequently, impact its convergence speed and overall performance. Two popular optimizers used in deep learning are RMSprop and AdamW. In this section, we will explain the role of optimizers and delve into the mechanisms of RMSprop and AdamW.
+
+Optimizers in machine learning are responsible for updating the weights and biases of a neural network to minimize a chosen loss function. The primary goal is to find the optimal set of parameters that result in the lowest possible loss. This is achieved through an iterative process that involves computing gradients of the loss with respect to the model's parameters and adjusting these parameters in the direction that reduces the loss.
+
+\subsubsection{RMSprop}
+
+RMSprop (Root Mean Square Propagation) is an adaptive learning rate optimizer designed to address the issue of slow convergence in stochastic gradient descent (SGD) and is defined by:
+
+
+\begin{align}
+	v_t &= \beta \cdot v_{t-1} + (1 - \beta) \cdot (\nabla J(\theta_t))^2 
+	\\
+	\theta_{t+1} &= \theta_t - \frac{\alpha}{\sqrt{v_t + \epsilon}} \cdot \nabla J(\theta_t)
+\end{align}    
+
+Where \(v_t\) describes the moving average of squared gradients, \(\beta\) the decay rate for the moving average (usually set to a value like 0.9), \(\nabla J(\theta_t)\) represents the gradient of the loss with respect to the model parameters \(\theta_t\), \(\alpha\) is the learning rate and\(\epsilon\) is a small constant (typically used to avoid division by zero).
+
+RMSprop works by maintaing a moving average of squared gradients for each parameter. It then adapts the learning rates individually for each parameter by dividing the current gradient by the square root of the moving average of squared gradients.
+This adaptation helps to scale down the learning rate for parameters with high variance in gradients and scale up the learning rate for those with low variance.
+RMSprop includes a smoothing term to avoid dividing by very small values, ensuring stable convergence.
+
+RMSprop is well-suited for tasks with non-stationary objectives or sparse data. It helps mitigate the vanishing and exploding gradient problems and often converges faster than traditional SGD.
+
+\subsubsection{AdamW}
+
+AdamW (Adam with Weight Decay) is a variant of the Adam optimizer that addresses weight decay issues. AdamW incorporates L2 regularization (weight decay) directly into the parameter update step, unlike the original Adam optimizer, which applies weight decay as an additional term after the parameter update. It is defined by:
+
+\begin{align}
+	m_t &= \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot \nabla J(\theta_t) \\
+	v_t &= \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot (\nabla J(\theta_t))^2 \\
+	\hat{m}_t &= \frac{m_t}{1 - \beta_1^t} \\
+	\hat{v}_t &= \frac{v_t}{1 - \beta_2^t} \\
+	\theta_{t+1} &= \theta_t - \frac{\alpha}{\sqrt{\hat{v}_t + \epsilon}} \cdot \hat{m}_t - \lambda \cdot \theta_t
+\end{align}
+
+Where \(m_t\) and \(v_t\) are the first and second moments of gradients, respectively, \(\beta_1\) and \(\beta_2\) are the exponential decay rates for the first and second moments (typically set to values like 0.9 and 0.999), \(\hat{m}_t\) and \(\hat{v}_t\) are bias-corrected estimates of the moments, \(\nabla J(\theta_t)\) represents the gradient of the loss with respect to the model parameters \(\theta_t\), \(\alpha\) is the learning rate, \(\epsilon\) is a small constant and \(\lambda\) is the weight decay term, which adds L2 regularization to the parameter updates. \\
+AdamW computes the gradients of the loss and updates the moving averages of the first and second moments of gradients.
+It then includes an L2 regularization term in the parameter update step, which helps prevent overfitting.
+By integrating weight decay, AdamW offers better generalization and improved performance in tasks with large neural networks.\\
+
+AdamW is generally well-suited for a wide range of deep learning tasks and is particularly effective when dealing with large networks and complex datasets.
+
+\subsubsection{Choosing the Right Optimizer}
+
+The choice between RMSprop and AdamW depends on the specific characteristics of the deep learning task:
+
+\begin{itemize}
+	\item \textbf{RMSprop}: When dealing with non-stationary objectives, sparse data, or tasks where adaptive learning rates are crucial. It can help in scenarios where the learning rate needs to vary across parameters.
+	
+	\item \textbf{AdamW}: When you require effective regularization through weight decay, especially in large neural networks with many parameters. It is suitable for tasks where preventing overfitting is a top priority.
+\end{itemize}
+
+In practice, experimenting with both optimizers on the specific dataset and model architecture is often the best way to determine which one performs better for the task.
+
+% ----------------------------------------------------------------------------------------------------------------------------------------------
+
+\subsection{Loss Functions} \label{loss}
+
+Loss functions play a crucial role in training neural networks. They quantify the difference between the predicted outputs of the model and the ground truth labels. Different loss functions are used for different types of tasks and data.
+
+\subsubsection{Cross-Entropy Loss} \label{sec:crossentropy}
+
+Cross-entropy loss, often used in classification tasks, measures the dissimilarity between predicted class probabilities and the true class labels. It is particularly suitable for problems where the outputs are probability distributions.
+
+The equation for binary cross-entropy loss for a single example is:
+
+\begin{align}
+	\text{Binary Cross-Entropy Loss} = -\left(y \log(\hat{y}) + (1 - y) \log(1 - \hat{y})\right)
+\end{align}
+
+Preferred Use Case: Cross-entropy loss is commonly used in classification tasks, including image classification and natural language processing.
+
+\subsubsection{Huber Loss}
+
+Huber loss is a robust loss function that combines the best properties of Mean Absolute Error (MAE) and Mean Squared Error (MSE) loss functions. It is less sensitive to outliers and provides a smoother gradient compared to MSE.
+
+The Huber loss is defined as:
+
+\begin{align}
+	\text{Huber Loss} = \begin{cases}
+		\frac{1}{2}(\hat{y} - y)^2, & \text{if } |\hat{y} - y| \leq \delta \\
+		\delta|\hat{y} - y| - \frac{1}{2}\delta^2, & \text{otherwise}
+	\end{cases}
+\end{align}
+
+Preferred Use Case: Huber loss is useful when dealing with regression problems where the dataset may contain outliers.
+
+\subsubsection{Mean Squared Error (MSE) Loss}
+
+Mean Squared Error (MSE) loss is a common loss function used for regression tasks. It measures the average squared difference between predicted and true values.
+
+The equation for MSE loss is:
+
+\begin{align}
+	\text{MSE Loss} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2    
+\end{align}
+
+Preferred Use Case: MSE loss is suitable for regression problems where the goal is to minimize the squared difference between predicted and true values.
+
+\subsubsection{Smooth L1 Loss}
+
+Smooth L1 loss is another loss function for regression that combines the best of both MAE and MSE. It is less sensitive to outliers than MSE and provides a smooth gradient.
+
+The equation for Smooth L1 loss is:
+
+\begin{align}
+	\text{Smooth L1 Loss} = \begin{cases}
+		0.5(\hat{y} - y)^2, & \text{if } |x| < 1 \\
+		|x| - 0.5, & \text{otherwise}
+	\end{cases}    
+\end{align}
+
+Preferred Use Case: Smooth L1 loss is suitable for regression problems, especially when dealing with data that may contain outliers.
+
+\subsubsection{Optimal Loss Function for Bomberman}
+
+Selecting the most suitable loss function for reinforcement learning in the context of playing the arcade game Bomberman requires careful consideration of the game's dynamics and objectives.\\
+Cross-entropy loss is typically used for classification tasks and may not be the most appropriate choice for Bomberman. It focuses on estimating class probabilities, which may not align well with the continuous and dynamic nature of the game. \\
+The Huber loss is designed to be robust to outliers, which could be beneficial in Bomberman, as the agent may encounter unexpected scenarios and rewards. However, it is primarily used for regression tasks, and its effectiveness in reinforcement learning settings might vary. \\
+MSE loss measures the squared difference between predicted and target values. In the context of Bomberman, where the agent's goal is to maximize cumulative rewards, using MSE loss could lead to convergence issues. It tends to focus on minimizing deviations from the target, which might not be the primary objective in a dynamic game like Bomberman. \\
+Smooth L1 loss combines the benefits of both Huber and MSE losses. It provides a smooth gradient and is less sensitive to outliers. For Bomberman, where the agent needs to balance exploration and exploitation, Smooth L1 loss could be a reasonable choice, as it encourages stable learning without being overly sensitive to small fluctuations in rewards.
