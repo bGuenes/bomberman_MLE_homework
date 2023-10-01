@@ -25,7 +25,7 @@ LEARNING_RATE = 1e-4
 INPU_DIM = 72
 NUM_ACTIONS = 6
 NUM_EPOCH = 500
-MEMORY_BUFFER = 20000
+MEMORY_BUFFER = 50000
 
 # Set if we want to train the encoder network or pretrain
 # the agent to with the rulebased agent
@@ -42,10 +42,8 @@ BOMB_ESCAPE_M = "BOMB_ESCAPE_M"
 BOMB_NECESSITY = "BOMB_NECESSITY"
 
 # params
-#BATCH_SIZE = 200
 GAMMA = 0.5
 TAU = 0.05
-#LR = 1e-3
 
 device = torch.device('cuda') if torch.cuda.is_available() and False else torch.device('cpu')
 
