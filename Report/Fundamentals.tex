@@ -4,13 +4,13 @@ In this section, we provide a brief overview of the fundamental machine learning
 have applied in both projects. Here, we outline the key principles and techniques that form the foundation 
 of our machine learning implementations. These concepts serve as the building blocks for the approaches adopted in both projects
 
-\subsection{Q-learning}
+\subsection{Q-Learning}
 
-Reinforcement learning (RL) is a subfield of machine learning that focuses on training agents to make a decision given a state representation of the world through trial and error, aiming to maximize a cumulative reward. Q-learning is a fundamental RL algorithm that has played a pivotal role in solving various problems in robotics, gaming, and more. In this section, we will introduce Q-learning and then focus on Deep Q-Networks (DQNs), explaining how they differ from traditional Q-tables.
+Reinforcement learning is a subfield of machine learning that focuses on training agents to make a decision given a state representation of the world through trial and error, aiming to maximize a cumulative reward. Q-learning is a fundamental RL algorithm that has played a pivotal role in solving various problems in robotics, gaming, and more. In this section, we will introduce Q-learning and then focus on Deep Q-Networks (DQNs), explaining how they differ from traditional Q-tables.
 
 \subsubsection{Q-Learning}
 
-Q-learning is a model-free reinforcement learning algorithm that learns an action-value function, denoted as \(Q(s, a)\), where 's' represents the state, and 'a' represents the action. The Q-value of a state-action pair quantifies the expected cumulative reward an agent can achieve starting from that state and taking a specific action. The primary goal of Q-learning is to find the optimal policy, which is a mapping of states to actions that maximizes the expected cumulative reward over time.
+Q-learning is a model-free RL algorithm that learns an action-value function, denoted as \(Q(s, a)\), where 's' represents the state, and 'a' represents the action. The Q-value of a state-action pair quantifies the expected cumulative reward an agent can achieve starting from that state and taking a specific action. The primary goal of Q-learning is to find the optimal policy, which is a mapping of states to actions that maximizes the expected cumulative reward over time.
 
 The Q-learning algorithm updates Q-values iteratively through the following equation:
 
@@ -24,7 +24,7 @@ Q-learning operates in discrete state and action spaces, making it highly suitab
 
 \subsubsection{Deep Q-Networks}
 
-Deep Q-Networks (DQNs) are a class of neural network-based reinforcement learning algorithms that combine deep learning with Q-learning principles. They address the limitations of Q-learning by approximating the Q-value function using a neural network instead of a Q-table. This enables DQNs to handle complex and continuous state spaces, making them highly effective in tasks like image-based game playing and autonomous driving.
+Deep Q-Networks are a class of neural network-based RL algorithms that combine deep learning with Q-learning principles. They address the limitations of Q-learning by approximating the Q-value function using a neural network instead of a Q-table. This enables DQNs to handle complex and continuous state spaces, making them highly effective in tasks like image-based game playing and autonomous driving.
 
 Key differences between DQNs and traditional Q-tables include:
 
@@ -56,7 +56,6 @@ At its core, a neural network is composed of interconnected nodes, known as neur
 \subsubsection{Working Principle of Neurons}
 
 Each neuron in a neural network performs a simple but crucial task. It takes in a weighted sum of its inputs, adds a bias term, and passes this value through an activation function to produce an output, thus each neuron in the network has a number of free parameters that need to be determined by training. The equation for the operation of a neuron is be defined as:
-
 \begin{equation}
 	\text{Output} = \text{Activation}\left(\sum_{i=1}^{n} (\text{Input}_i \times \text{Weight}_i) + \text{Bias}\right)
 \end{equation}
@@ -85,6 +84,69 @@ Batch Normalization helps mitigate issues like vanishing and exploding gradients
 Neural networks with Batch Normalization also tend to converge faster. The normalization of activations helps prevent the network from getting stuck in plateaus, enabling quicker convergence to a better solution.
 Batch Normalization introduces a degree of regularization by reducing internal covariate shift (the change in the distribution of activations between layers). This often leads to better generalization and reduced overfitting.
 
+%------------------------------------------------------------------------------------------------------------------------------
+
+\subsection{Loss Functions} \label{loss}
+
+Loss functions play a crucial role in training neural networks. They quantify the difference between the predicted outputs of the model and the ground truth labels. Different loss functions are used for different types of tasks and data.
+
+\subsubsection{Cross-Entropy Loss} \label{sec:crossentropy}
+
+Cross-entropy loss, often used in classification tasks, measures the dissimilarity between predicted class probabilities and the true class labels. It is particularly suitable for problems where the outputs are probability distributions.
+
+The equation for binary cross-entropy loss for a single example is:
+\begin{align}
+	\text{Binary Cross-Entropy Loss} = -\left(y \log(\hat{y}) + (1 - y) \log(1 - \hat{y})\right)
+\end{align}
+
+Preferred Use Case: Cross-entropy loss is commonly used in classification tasks, including image classification and natural language processing.
+
+\subsubsection{Huber Loss}
+
+Huber loss is a robust loss function that combines the best properties of Mean Absolute Error (MAE) and Mean Squared Error (MSE) loss functions. It is less sensitive to outliers and provides a smoother gradient compared to MSE.
+
+The Huber loss is defined as:
+\begin{align}
+	\text{Huber Loss} = \begin{cases}
+		\frac{1}{2}(\hat{y} - y)^2, & \text{if } |\hat{y} - y| \leq \delta \\
+		\delta|\hat{y} - y| - \frac{1}{2}\delta^2, & \text{otherwise}
+	\end{cases}
+\end{align}
+
+Preferred Use Case: Huber loss is useful when dealing with regression problems where the dataset may contain outliers.
+
+\subsubsection{Mean Squared Error (MSE) Loss}
+
+Mean Squared Error (MSE) loss is a common loss function used for regression tasks. It measures the average squared difference between predicted and true values.
+
+The equation for MSE loss is:
+\begin{align}
+	\text{MSE Loss} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2    
+\end{align}
+
+Preferred Use Case: MSE loss is suitable for regression problems where the goal is to minimize the squared difference between predicted and true values.
+
+\subsubsection{Smooth L1 Loss}
+
+Smooth L1 loss is another loss function for regression that combines the best of both MAE and MSE. It is less sensitive to outliers than MSE and provides a smooth gradient.
+
+The equation for Smooth L1 loss is:
+\begin{align}
+	\text{Smooth L1 Loss} = \begin{cases}
+		0.5(\hat{y} - y)^2, & \text{if } |x| < 1 \\
+		|x| - 0.5, & \text{otherwise}
+	\end{cases}    
+\end{align}
+
+Preferred Use Case: Smooth L1 loss is suitable for regression problems, especially when dealing with data that may contain outliers.
+
+\subsubsection{Optimal Loss Function for Bomberman}
+
+Selecting the most suitable loss function for reinforcement learning in the context of playing the arcade game Bomberman requires careful consideration of the game's dynamics and objectives.\\
+Cross-entropy loss is typically used for classification tasks and may not be the most appropriate choice for Bomberman. It focuses on estimating class probabilities, which may not align well with the continuous and dynamic nature of the game. \\
+The Huber loss is designed to be robust to outliers, which could be beneficial in Bomberman, as the agent may encounter unexpected scenarios and rewards. However, it is primarily used for regression tasks, and its effectiveness in RL settings might vary. \\
+MSE loss measures the squared difference between predicted and target values. In the context of Bomberman, where the agent's goal is to maximize cumulative rewards, using MSE loss could lead to convergence issues. It tends to focus on minimizing deviations from the target, which might not be the primary objective in a dynamic game like Bomberman. \\
+Smooth L1 loss combines the benefits of both Huber and MSE losses. It provides a smooth gradient and is less sensitive to outliers. For Bomberman, where the agent needs to balance exploration and exploitation, Smooth L1 loss could be a reasonable choice, as it encourages stable learning without being overly sensitive to small fluctuations in rewards.
 
 % ----------------------------------------------------------------------------------------------------------------------------------------------
 \subsection{Optimizer}
@@ -145,68 +207,4 @@ In practice, experimenting with both optimizers on the specific dataset and mode
 
 % ----------------------------------------------------------------------------------------------------------------------------------------------
 
-\subsection{Loss Functions} \label{loss}
 
-Loss functions play a crucial role in training neural networks. They quantify the difference between the predicted outputs of the model and the ground truth labels. Different loss functions are used for different types of tasks and data.
-
-\subsubsection{Cross-Entropy Loss} \label{sec:crossentropy}
-
-Cross-entropy loss, often used in classification tasks, measures the dissimilarity between predicted class probabilities and the true class labels. It is particularly suitable for problems where the outputs are probability distributions.
-
-The equation for binary cross-entropy loss for a single example is:
-
-\begin{align}
-	\text{Binary Cross-Entropy Loss} = -\left(y \log(\hat{y}) + (1 - y) \log(1 - \hat{y})\right)
-\end{align}
-
-Preferred Use Case: Cross-entropy loss is commonly used in classification tasks, including image classification and natural language processing.
-
-\subsubsection{Huber Loss}
-
-Huber loss is a robust loss function that combines the best properties of Mean Absolute Error (MAE) and Mean Squared Error (MSE) loss functions. It is less sensitive to outliers and provides a smoother gradient compared to MSE.
-
-The Huber loss is defined as:
-
-\begin{align}
-	\text{Huber Loss} = \begin{cases}
-		\frac{1}{2}(\hat{y} - y)^2, & \text{if } |\hat{y} - y| \leq \delta \\
-		\delta|\hat{y} - y| - \frac{1}{2}\delta^2, & \text{otherwise}
-	\end{cases}
-\end{align}
-
-Preferred Use Case: Huber loss is useful when dealing with regression problems where the dataset may contain outliers.
-
-\subsubsection{Mean Squared Error (MSE) Loss}
-
-Mean Squared Error (MSE) loss is a common loss function used for regression tasks. It measures the average squared difference between predicted and true values.
-
-The equation for MSE loss is:
-
-\begin{align}
-	\text{MSE Loss} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2    
-\end{align}
-
-Preferred Use Case: MSE loss is suitable for regression problems where the goal is to minimize the squared difference between predicted and true values.
-
-\subsubsection{Smooth L1 Loss}
-
-Smooth L1 loss is another loss function for regression that combines the best of both MAE and MSE. It is less sensitive to outliers than MSE and provides a smooth gradient.
-
-The equation for Smooth L1 loss is:
-
-\begin{align}
-	\text{Smooth L1 Loss} = \begin{cases}
-		0.5(\hat{y} - y)^2, & \text{if } |x| < 1 \\
-		|x| - 0.5, & \text{otherwise}
-	\end{cases}    
-\end{align}
-
-Preferred Use Case: Smooth L1 loss is suitable for regression problems, especially when dealing with data that may contain outliers.
-
-\subsubsection{Optimal Loss Function for Bomberman}
-
-Selecting the most suitable loss function for reinforcement learning in the context of playing the arcade game Bomberman requires careful consideration of the game's dynamics and objectives.\\
-Cross-entropy loss is typically used for classification tasks and may not be the most appropriate choice for Bomberman. It focuses on estimating class probabilities, which may not align well with the continuous and dynamic nature of the game. \\
-The Huber loss is designed to be robust to outliers, which could be beneficial in Bomberman, as the agent may encounter unexpected scenarios and rewards. However, it is primarily used for regression tasks, and its effectiveness in reinforcement learning settings might vary. \\
-MSE loss measures the squared difference between predicted and target values. In the context of Bomberman, where the agent's goal is to maximize cumulative rewards, using MSE loss could lead to convergence issues. It tends to focus on minimizing deviations from the target, which might not be the primary objective in a dynamic game like Bomberman. \\
-Smooth L1 loss combines the benefits of both Huber and MSE losses. It provides a smooth gradient and is less sensitive to outliers. For Bomberman, where the agent needs to balance exploration and exploitation, Smooth L1 loss could be a reasonable choice, as it encourages stable learning without being overly sensitive to small fluctuations in rewards.
