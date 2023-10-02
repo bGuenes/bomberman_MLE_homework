@@ -44,6 +44,60 @@
       \verb https://www.baeldung.com/cs/q-learning-vs-deep-q-learning-vs-deep-q-network#:~:text=One%20of%20the%20main%20drawbacks,to%20store%20the%20Q%2Dvalues.
       \endverb
     \endentry
+    \entry{batchnormexp}{online}{}
+      \name{author}{1}{}{%
+        {{hash=915af163e2107106fced5dd3164d9a8e}{%
+           family={Brownlee},
+           familyi={B\bibinitperiod},
+           given={Jason},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{915af163e2107106fced5dd3164d9a8e}
+      \strng{fullhash}{915af163e2107106fced5dd3164d9a8e}
+      \strng{bibnamehash}{915af163e2107106fced5dd3164d9a8e}
+      \strng{authorbibnamehash}{915af163e2107106fced5dd3164d9a8e}
+      \strng{authornamehash}{915af163e2107106fced5dd3164d9a8e}
+      \strng{authorfullhash}{915af163e2107106fced5dd3164d9a8e}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A Gentle Introduction to Batch Normalization for Deep Neural Networks}
+      \field{year}{2019}
+      \verb{urlraw}
+      \verb https://machinelearningmastery.com/batch-normalization-for-training-of-deep-neural-networks/
+      \endverb
+      \verb{url}
+      \verb https://machinelearningmastery.com/batch-normalization-for-training-of-deep-neural-networks/
+      \endverb
+    \endentry
+    \entry{rmsprop}{online}{}
+      \name{author}{1}{}{%
+        {{hash=6b80db3f2bca9150fa7a43922f968bfa}{%
+           family={Bushaev},
+           familyi={B\bibinitperiod},
+           given={Vitaly},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{6b80db3f2bca9150fa7a43922f968bfa}
+      \strng{fullhash}{6b80db3f2bca9150fa7a43922f968bfa}
+      \strng{bibnamehash}{6b80db3f2bca9150fa7a43922f968bfa}
+      \strng{authorbibnamehash}{6b80db3f2bca9150fa7a43922f968bfa}
+      \strng{authornamehash}{6b80db3f2bca9150fa7a43922f968bfa}
+      \strng{authorfullhash}{6b80db3f2bca9150fa7a43922f968bfa}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Understanding RMSprop - faster neural network learning}
+      \field{year}{2018}
+      \verb{urlraw}
+      \verb https://towardsdatascience.com/understanding-rmsprop-faster-neural-network-learning-62e116fcf29a#:~:text=RMSprop%E2%80%94%20is%20unpublished%20optimization%20algorithm,Machine%20Learning%E2%80%9D%20%5B1%5D.
+      \endverb
+      \verb{url}
+      \verb https://towardsdatascience.com/understanding-rmsprop-faster-neural-network-learning-62e116fcf29a#:~:text=RMSprop%E2%80%94%20is%20unpublished%20optimization%20algorithm,Machine%20Learning%E2%80%9D%20%5B1%5D.
+      \endverb
+    \endentry
     \entry{Onl:crossentr}{online}{}
       \name{author}{1}{}{%
         {{hash=7f5bdcac2c3a7916096c8a5eb2dde9cd}{%
@@ -289,6 +343,44 @@
       \field{note}{\url{https://www.compthree.com/blog/autoencoder/}}
       \field{title}{Variational Autoencoders are Beautiful}
       \field{year}{2019}
+    \endentry
+    \entry{adamW}{article}{}
+      \name{author}{2}{}{%
+        {{hash=1241b8181104f1917578d4c7f9b323b6}{%
+           family={Loshchilov},
+           familyi={L\bibinitperiod},
+           given={Ilya},
+           giveni={I\bibinitperiod}}}%
+        {{hash=528d4af87fd2ecf5fb8a22db913ce088}{%
+           family={Hutter},
+           familyi={H\bibinitperiod},
+           given={Frank},
+           giveni={F\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {arXiv}%
+      }
+      \strng{namehash}{b308ccb07134a06ec3735828ac4f15e2}
+      \strng{fullhash}{b308ccb07134a06ec3735828ac4f15e2}
+      \strng{bibnamehash}{b308ccb07134a06ec3735828ac4f15e2}
+      \strng{authorbibnamehash}{b308ccb07134a06ec3735828ac4f15e2}
+      \strng{authornamehash}{b308ccb07134a06ec3735828ac4f15e2}
+      \strng{authorfullhash}{b308ccb07134a06ec3735828ac4f15e2}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Decoupled Weight Decay Regularization}
+      \field{year}{2019}
+      \verb{doi}
+      \verb arXiv:1711.05101
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/pdf/1711.05101.pdf
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/pdf/1711.05101.pdf
+      \endverb
     \endentry
     \entry{deepRL}{article}{}
       \name{author}{7}{}{%
@@ -562,6 +654,33 @@
       \verb https://arxiv.org/pdf/1707.06347.pdf
       \endverb
     \endentry
+    \entry{huberloss}{online}{}
+      \name{author}{1}{}{%
+        {{hash=90b97dd4c391e7d8d7f0dd3c89e8bd81}{%
+           family={Seif},
+           familyi={S\bibinitperiod},
+           given={George},
+           giveni={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{90b97dd4c391e7d8d7f0dd3c89e8bd81}
+      \strng{fullhash}{90b97dd4c391e7d8d7f0dd3c89e8bd81}
+      \strng{bibnamehash}{90b97dd4c391e7d8d7f0dd3c89e8bd81}
+      \strng{authorbibnamehash}{90b97dd4c391e7d8d7f0dd3c89e8bd81}
+      \strng{authornamehash}{90b97dd4c391e7d8d7f0dd3c89e8bd81}
+      \strng{authorfullhash}{90b97dd4c391e7d8d7f0dd3c89e8bd81}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Understanding the 3 most common loss functions for Machine Learning Regression}
+      \field{year}{2019}
+      \verb{urlraw}
+      \verb https://towardsdatascience.com/understanding-the-3-most-common-loss-functions-for-machine-learning-regression-23e0ef3e14d3
+      \endverb
+      \verb{url}
+      \verb https://towardsdatascience.com/understanding-the-3-most-common-loss-functions-for-machine-learning-regression-23e0ef3e14d3
+      \endverb
+    \endentry
     \entry{selfplay}{online}{}
       \name{author}{1}{}{%
         {{hash=ce060131aa2796521327cdda1761a3c3}{%
@@ -589,6 +708,46 @@
       \endverb
       \verb{url}
       \verb https://huggingface.co/learn/deep-rl-course/unit7/self-play
+      \endverb
+    \endentry
+    \entry{smoothloss}{online}{}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{title}{SmoothL1Loss}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html
+      \endverb
+      \verb{url}
+      \verb https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html
+      \endverb
+    \endentry
+    \entry{dqntut}{online}{}
+      \name{author}{1}{}{%
+        {{hash=12c4fa347402de7d37d2afca53eaeafa}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Mike},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{12c4fa347402de7d37d2afca53eaeafa}
+      \strng{fullhash}{12c4fa347402de7d37d2afca53eaeafa}
+      \strng{bibnamehash}{12c4fa347402de7d37d2afca53eaeafa}
+      \strng{authorbibnamehash}{12c4fa347402de7d37d2afca53eaeafa}
+      \strng{authornamehash}{12c4fa347402de7d37d2afca53eaeafa}
+      \strng{authorfullhash}{12c4fa347402de7d37d2afca53eaeafa}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Deep Q-Learning Tutorial: minDQN}
+      \field{year}{2020}
+      \verb{urlraw}
+      \verb https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc
+      \endverb
+      \verb{url}
+      \verb https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc
       \endverb
     \endentry
     \entry{Art:Overfitting}{article}{}

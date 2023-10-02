@@ -2354,22 +2354,28 @@
     <bcf:citekey order="3" intorder="1">mario</bcf:citekey>
     <bcf:citekey order="4" intorder="1">ppo</bcf:citekey>
     <bcf:citekey order="5" intorder="1">ppobomberman</bcf:citekey>
-    <bcf:citekey order="6" intorder="1">Art:torchQlearn</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">Onl:greedy</bcf:citekey>
-    <bcf:citekey order="8" intorder="1">Onl:pytorch</bcf:citekey>
-    <bcf:citekey order="9" intorder="1">Onl:replaybuff</bcf:citekey>
-    <bcf:citekey order="10" intorder="1">Onl:dataAug</bcf:citekey>
-    <bcf:citekey order="11" intorder="1">Img:autoencoder</bcf:citekey>
-    <bcf:citekey order="12" intorder="1">Img:autoencoder</bcf:citekey>
-    <bcf:citekey order="13" intorder="1">Art:Overfitting</bcf:citekey>
-    <bcf:citekey order="14" intorder="1">Onl:autoencoder</bcf:citekey>
-    <bcf:citekey order="15" intorder="1">Onl:autoencoder</bcf:citekey>
-    <bcf:citekey order="16" intorder="1">Onl:crossentr</bcf:citekey>
-    <bcf:citekey order="17" intorder="1">Onl:qtabledis</bcf:citekey>
-    <bcf:citekey order="18" intorder="1">selfplay</bcf:citekey>
-    <bcf:citekey order="19" intorder="1">batchnorm</bcf:citekey>
-    <bcf:citekey order="20" intorder="1">batchnormpos</bcf:citekey>
-    <bcf:citekey order="21" intorder="1">batchnorm</bcf:citekey>
+    <bcf:citekey order="6" intorder="1">dqntut</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">batchnormexp</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">huberloss</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">smoothloss</bcf:citekey>
+    <bcf:citekey order="10" intorder="1">rmsprop</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">adamW</bcf:citekey>
+    <bcf:citekey order="12" intorder="1">Art:torchQlearn</bcf:citekey>
+    <bcf:citekey order="13" intorder="1">Onl:greedy</bcf:citekey>
+    <bcf:citekey order="14" intorder="1">Onl:pytorch</bcf:citekey>
+    <bcf:citekey order="15" intorder="1">Onl:replaybuff</bcf:citekey>
+    <bcf:citekey order="16" intorder="1">Onl:dataAug</bcf:citekey>
+    <bcf:citekey order="17" intorder="1">Img:autoencoder</bcf:citekey>
+    <bcf:citekey order="18" intorder="1">Img:autoencoder</bcf:citekey>
+    <bcf:citekey order="19" intorder="1">Art:Overfitting</bcf:citekey>
+    <bcf:citekey order="20" intorder="1">Onl:autoencoder</bcf:citekey>
+    <bcf:citekey order="21" intorder="1">Onl:autoencoder</bcf:citekey>
+    <bcf:citekey order="22" intorder="1">Onl:crossentr</bcf:citekey>
+    <bcf:citekey order="23" intorder="1">Onl:qtabledis</bcf:citekey>
+    <bcf:citekey order="24" intorder="1">selfplay</bcf:citekey>
+    <bcf:citekey order="25" intorder="1">batchnorm</bcf:citekey>
+    <bcf:citekey order="26" intorder="1">batchnormpos</bcf:citekey>
+    <bcf:citekey order="27" intorder="1">batchnorm</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">
