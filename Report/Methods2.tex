@@ -1,3 +1,4 @@
+
 \fancyhead[R]{Berkay Günes}
 
 In this section, we elucidate our methodology and approaches concerning the various machine learning models 
@@ -7,15 +8,15 @@ the concepts we have discarded, and expound upon the rationale for ultimately se
 
 \subsection{Deep Q-Learning Agent}
 
-In the end, this project was the better one out of the two projects we had to develop. We didn't make the decision lightly. 
-But this model utilizes 100\% deep Q-learning and does not imitate any other rule-based agent like the approach in the second project did.
+In the end, this project was the better one out of the two projects we had to develop. We did not make the decision lightly. 
+But this model utilizes 100\% Deep Q-learning and does not imitate any other rule-based agent like the approach in the second project did.
 
 
 \subsubsection{Data Collection}
 
 To optimize the agent's learning of Bomberman efficiently later on, we decided to use a \verb|ReplayMemory|, also known as a \verb|ReplayBuffer|. 
 
-During each step in the \verb|game_events_occurred|function, game transitions are collected and stored in the \verb|ReplayMemory|.
+During each step in the \verb|game_events_occurred| function, game transitions are collected and stored in the \verb|ReplayMemory|.
 After each round in the \verb|end_of_round| function, 
 our model is trained using these data. The advantage of using this concept of a \verb|ReplayMemory| is that it allows effective adjustment of 
 batch sizes and the generation of random samples. This enables data shuffling, preventing the model from learning dependencies between the data. 
@@ -26,10 +27,7 @@ Here is a code snippet of our ReplayMemory:
 class ReplayMemory(object):
     def __init__(self, capacity):
         self.memory = deque([], maxlen=capacity)
-        self.rewards = [0]
-        self.scores = [0]
-        self.mean_rewards = [0]
-        self.survival_list = [0]
+        ...
 
     def push(self, *args):
         """Save a transition"""
@@ -41,25 +39,25 @@ class ReplayMemory(object):
     ...
 
     def __len__(self):
-    return len(self.memory)  
+    		return len(self.memory)  
 
 \end{lstlisting}
 
 The push function is used to store game transitions in the memory, including the current state, the next state, the current action, and the 
-reward. We have used a batch size of 200, and the memory can store up to 10,000 elements before the oldest elements 
+reward. We have used a batch size of 256, and the memory can store up to 50,000 elements before the oldest elements 
 are removed when new ones are pushed. These values are not chosen arbitrarily but have proven to be the most effective for us 
-after extensive experimentation. With a batch size of 32, our model took too long to perform well, and beyond 200, it seemed to achieve a 
+after extensive experimentation. With a batch size of 32, our model took too long to perform well, and beyond 256, it seemed to achieve a 
 similar speed as 500. However, we did not want to go higher, as it would have resulted in decreased accuracy.
 
 \subsubsection{State Representation} \label{InFeatures}
 
-It is important to preprocess the input to the Neural Network, else it would be difficult for the Network to determine the important parts out of the big feature state that is provided by the game environment.\\
+It is important to preprocess the input to the neural network, else it would be difficult for the network to determine the important parts out of the big feature state that is provided by the game environment.\\
 We decided to limit the vision of the agent to a surrounding of a 7x7 grid. This gives the benefit of being able to train the agent on different game sizes and being able to scale the game without the agent losing information.\\ \\
-Since Neural networks prefer working with ones and zeros we tried to separate each information as much as possible and not cramp all available informations into one array with different numbers.\\
+Since neural networks prefer working with ones and zeros we tried to separate each information as much as possible and not cramp all available informations into one array with different numbers.\\
 Therefore we created three 7x7 arrays, that contain -1 for one type of information on that field and 1 for another. So one array has -1 for walls and 1 for crates, the second array has -1 for explosions and 1 for coins and the third array contains -1 for bombs and their range and 1 for opponents.\\
 To give the agent a chance to have a sense for whats outside of his narrow world view, we implemented a 4x4 array that contains informations, whether there is a coin, crate, explosion/bomb or opponent to the right, left, top or bottom of the agent.\\ \\
 So the input to our neural network contains three 7x7 arrays with a vision of its surroundings and a 4x4 array with an outside view.
-To have a better understanding of that you can see the concept of our \verb|sate_to_feature| function here:
+To get a better understanding of that, you can see the concept of our \verb|sate_to_feature| function here:
 
 \begin{figure}[H]
     \centering
@@ -67,18 +65,18 @@ To have a better understanding of that you can see the concept of our \verb|sate
     \includegraphics[width=\oneImgWidth]{images/chartFinalProjStates}%
     
     \captionadjust%
-    \caption{\label{fig:chartFinalProjStates} Basic concept of the state to features function.
+    \caption{\label{fig:chartFinalProjStates} Basic concept of the state to features function showing all three 7x7 arrays and the 4x4 outside map as input to the neural network.
     }%
 \end{figure}
 
 \subsubsection{Model Architecture} \label{NetworkS}
 
-A significant part to how well the agent performs and its dependencies to learn are defined by its Neural Network structure.
+A significant part to how well the agent performs and its dependencies to learn are defined by its neural network structure.
 We tried different approaches to determine what gives the agent the best possibility to master the game.
-Our final agent has a Network that takes in four tensors and has an individual pipeline for each of these tensors in the first two layers. Afterwards they get connected into one fully connected layer before they connect to the output layer.\\
+Our final agent has a network that takes in four tensors and has an individual pipeline for each of these tensors in the first two layers. Afterwards they get connected into one fully connected layer before they connect to the output layer.\\
 As described in \ref{InFeatures} we give our network three arrays with a 7x7 view around the agent. These array go each through a convolutional layer and get each passed into their own linear layer before they all get connected in the layer before the output.\\ \\
 The idea behind this network structure is to let the network first process all informations on crates, walls, coins, bombs, explosions and opponents independently, before everything gets mushed together.
-To have a better understanding of that you can see the code snippet below: 
+The network is presented in detail by the code snippet below: 
 
 \begin{lstlisting}[language=Python]
 
@@ -100,9 +98,6 @@ class DQN(nn.Module):
 
         self.output = nn.Linear(30, n_actions)
 
-
-    # Called with either one element to determine next action, or a batch
-    # during optimization. Returns tensor([[left0exp,right0exp]...]).
     def forward(self, x1, x2, x3, x4):
 
         x1 = F.relu(self.input1(x1))
@@ -125,23 +120,22 @@ class DQN(nn.Module):
 \end{lstlisting}
 
 \noindent Note that we use the object oriented implementation to create the neuronal network 
-using Pytorch.
+using PyTorch.
 
 \subsubsection{Loss Function and Optimizer}
 
 For our best model we used the RMSprop optimizer and the MSE loss function. In the end 
-we tried a lot of the available optimizers and loss functions available in PyTorch 
-in all combinations. But this choice was the best for us. The reason why that could be is
-that playing Bomberman involves complex decision-making processes where the agent needs to understand the game environment, 
+we tried a lot of the available optimizers and loss functions from PyTorch 
+in various combinations as examined later in section \ref{sec:deepqexperiments}. The reason why the MSE loss was working best could be that playing Bomberman involves complex decision-making processes where the agent needs to understand the game environment, 
 make strategic choices, and optimize its gameplay to win. MSE loss helps in refining these decisions, emphasizing the importance of predicting the 
 exact or close-to-exact values for various actions or states in the game. But what we also observed is that the MSE loss sometimes 
 fluctuates significantly, which was frustrating at times, especially when the model was saved at a moment when the loss function was oscillating 
 in an unfavorable direction. Nevertheless, the MSE loss was still able to converge best towards zero.\\
 
-For the optimizer could be the reason that RMSprop ensures that the learning process remains stable and responsive to the changing dynamics 
+In regards to the optimizer the reason why RMSprop perfromed best could be that it ensures that the learning process remains stable and responsive to the changing dynamics 
 of the game environment. It prevents the model from getting stuck in local minima and helps it explore the solution space effectively.
 But the same applies to the AdamW optimizer, which, according to our own research, is even supposed to be slightly better than RMSprop. 
-However, in the end, RMSprop worked best for us; we were able to see at least a small improvement in our agent's performance in the game.
+However, RMSprop worked best in our model; we were able to see at least a small improvement in our agent's performance in the game.
 
 \newpage
 \fancyhead[R]{Kevin Klein}
@@ -153,13 +147,13 @@ the rule-based agent's decision-making. The AI, powered by a carefully chosen mo
 should learn to imitate the agent's actions in various game states. This approach allowed us to create an AI actor 
 that could navigate Bomberman's challenges and make decisions based on the learned rules and actions of the rule-based agent.
 
-To enhance our model and surpass the rule-based agent's performance we want to use deep Q-learning~\cite{Art:torchQlearn}. We extended our actor-critic architecture by 
+To enhance our model and surpass the rule-based agent's performance we want to use Deep Q-learning~\cite{Art:torchQlearn}. We extended our actor-critic architecture by 
 introducing a critic network to estimate Q-values, allowing the agent to understand the long-term consequences of its actions. 
 We implemented an exploration strategy, such as epsilon-greedy~\cite{Onl:greedy}, to encourage the model to explore new strategies and avoid getting 
 stuck in suboptimal actions. Lastly, we employed a reward shaping mechanism that provided tailored rewards for encouraging desirable behaviors.
 
-The basic idea is as follows: we first pretrain a model that imitates the rule-based agent and then further improve this model using deep Q-learning. 
-However, the deep Q-learning part is not explained in detail in this section since the architecture is almost identical to what was explained in the 
+The basic idea is as follows: we first pretrain a model that imitates the rule-based agent and then further improve this model using Deep Q-learning. 
+However, the Deep Q-learning part is not explained in detail in this section since the architecture is almost identical to what was explained in the 
 section about our final project. Nevertheless, we do discuss where there were changes, such as in the features.
 
 We chose PyTorch~\cite{Onl:pytorch} as our primary library because it offers a flexible and dynamic computation graph, allowing us to easily design and 
@@ -286,15 +280,14 @@ to play the game effectively without necessarily striving for extreme efficiency
 the entire field but rather focus on a specific part while filtering out the rest.
 Reducing the field to 7x7 retained key spatial relationships 
 and relevant game features while simplifying the representation, thus allowing our AI agents to focus on essential information.
-To determine if there is a difference in how the rule-based agent plays the game when the view box is reduced to 7x7, we had the following idea:
-lets consider the following function: 
+To determine if there is a difference in how the rule-based agent plays the game when the view box is reduced to 7x7, we had the following idea considering the following function: 
 \begin{equation} \label{eq:1}
 G_A(f,v) \rightarrow \{\text{up, down, left, right, bomb}\}
 \end{equation}
 
-that outputs the best possible action the agent could do. The field is described by $f$ and $v$ is the viewbox of the agent. We did many 
-test rounds with the rulbased agent on an 17x17 field with \verb|--seed 1| for a comparable result. We had two scenarios
-in one scenario the rulbased agent saw the whole 17x17 field e.g $G_a(f, 17\times17)$, on the other scenario the agent saw a
+This equation outputs the best possible action the agent could do. The field is described by $f$ and $v$ is the viewbox of the agent. We did many 
+test rounds with the rule-based agent on an 17x17 field with \verb|--seed 1| for a comparable result. We had two scenarios
+in one scenario the rule-based agent saw the whole 17x17 field e.g $G_a(f, 17\times17)$, on the other scenario the agent saw a
 7x7 field e.g $G_a(f, 7\times7)$. Then we calculated the probability $p$ to find out how likely it is, that the actions in both scenarios are different in one step.
 We simply counted the number of different actions and divided them by the maximum number of steps.
 For the 7x7 field we had a probability of $p=0.054$ which was the best value for us compared to a 5x5 or 3x3 viewbox.\\
@@ -411,26 +404,26 @@ Agent Network:
             Input1: 72, Hidden1: 64, Hidden2: 32, Hidden3: 16, Output1: 6
 \end{verbatim}
 
-\subsubsection{Loss function and optimizer}
+\subsubsection{Loss Function and Optimizer}
 
 We have two models: the encoder network for further feature compression and the agent network, which is tasked with 
 learning how to play the game effectively. Additionally, the agent is initially meant to imitate the rule-based agent, which is 
-achieved through classification. Later on, the agent will be further improved using deep Q-learning. For all these scenarios, we require 
+achieved through classification. Later on, the agent will be further improved using Deep Q-learning. For all these scenarios, we require 
 different loss functions and optimizers with varying learning rates because there are more suitable optimizers and loss functions for specific cases.\\
 
 For the encoder network, the ADAM optimizer with a learning rate of $0.001$ proved to be the most effective, and the chosen loss 
 function was the MSE (Mean Squared Error) loss. During experimentation, we observed that the loss function did not converge to near 
 zero with a learning rate of $>0.001$, and with a learning rate of $<0.001$, it converged towards zero, albeit very slowly. \\
 
-For the agent network when mimic the rulbased agent, we used the ADAM optimizer with a learning rate of $0.0001$ and the Cross-Entropy loss function because
+For the agent network when mimic the rule-based agent, we used the ADAM optimizer with a learning rate of $0.0001$ and the Cross-Entropy loss function because
 in classification, the goal is to assign probabilities to each class. Cross-entropy loss directly deals with probability 
 distributions and can handle multi-class problems efficiently~\cite{Onl:crossentr}.\\
 
-For the agent network during deep Q-learning, we used the ADAM optimizer with a learning rate of $0.0001$ and the Huber loss as the loss function.
+For the agent network during Deep Q-learning, we used the ADAM optimizer with a learning rate of $0.0001$ and the Huber loss as the loss function.
 It is designed to balance the benefits of mean squared error (MSE) and mean absolute error (MAE) loss functions.
 But for any reason was the MSE loss better for the encoder network than the Huber loss.
 
-\subsection{Other aproaches}
+\subsection{Other Approaches}
 
 At the beginning of the project, we had several other ideas about how to construct our AI agent. One alternative idea was to use Q-tables. 
 For the coin collector agent, we considered the concept that it would only perceive one coin, specifically the one closest to it.
@@ -466,7 +459,7 @@ In this equation:
 
 \end{itemize}
 
-The rason why we discarded this idea is that the bomberman environment has a large number of states, even when using a reduced state representation. 
+The reason why we discarded this idea is that the bomberman environment has a large number of states, even when using a reduced state representation. 
 Each cell on the game board can have multiple attributes (e.g., walls, crates, coins, enemies, bombs), resulting in an extensive state space. 
 Creating a Q-table to store Q-values for every state-action pair in such a high-dimensional space would be impractical~\cite{Onl:qtabledis}.
 
@@ -475,6 +468,6 @@ Creating a Q-table to store Q-values for every state-action pair in such a high-
 
 Our coin collector agent was given the entire 17x17 field but only focused on the nearest coin, which was simply added to the \verb|game_state["field"]|. 
 It received rewards only when collecting this specific coin. This approach worked very well for us, and the agent could consistently collect nearly 
-all the coins later in the game. The advantage of this method is that it doesn't matter how many coins are on the field; the agent doesn't need to be 
-retrained. However, for an agent tasked with more complex actions like defeating enemies, destroying crates, and collecting bombs, we couldn't 
+all the coins later in the game. The advantage of this method is that it does not matter how many coins are on the field; the agent does not need to be 
+retrained. However, for an agent tasked with more complex actions like defeating enemies, destroying crates, and collecting bombs, we could not 
 pursue this idea. This is because we explored other concepts to enable the agent to perform various tasks effectively, and these concepts are described in this report.
