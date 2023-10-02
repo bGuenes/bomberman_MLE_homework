@@ -314,12 +314,7 @@ single 147-element array. Below is a code snippet:
     ...
 
     def state_to_features(game_state: dict) -> np.array:
-        field = game_state["field"]
-        bombs = game_state["bombs"]
-        explosion_map = game_state["explosion_map"]
-        coins = game_state["coins"]
-        agent = game_state["self"]
-        others = game_state["others"]
+        ...
 
         my_pos = make_field(agent[3])
 
