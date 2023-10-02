@@ -2,7 +2,7 @@
 
 In this section, we provide a brief overview of the fundamental machine learning concepts that we 
 have applied in both projects. Here, we outline the key principles and techniques that form the foundation 
-of our machine learning implementations. These concepts serve as the building blocks for the approaches adopted in both projects
+of our machine learning implementations. These concepts serve as the building blocks for the approaches adopted in both projects. Whenever there is no citation the contents is based on the lecture this project was conducted for, Machine Learning Essentials.
 
 \subsection{Q-Learning}
 
@@ -24,7 +24,7 @@ Q-learning operates in discrete state and action spaces, making it highly suitab
 
 \subsubsection{Deep Q-Networks}
 
-Deep Q-Networks are a class of neural network-based RL algorithms that combine deep learning with Q-learning principles. They address the limitations of Q-learning by approximating the Q-value function using a neural network instead of a Q-table. This enables DQNs to handle complex and continuous state spaces, making them highly effective in tasks like image-based game playing and autonomous driving.
+Deep Q-Networks are a class of neural network-based RL algorithms that combine deep learning with Q-learning principles. They address the limitations of Q-learning by approximating the Q-value function using a neural network instead of a Q-table. This enables DQNs to handle complex and continuous state spaces, making them highly effective in tasks like image-based game playing and autonomous driving. \cite{dqntut}
 
 Key differences between DQNs and traditional Q-tables include:
 
@@ -82,7 +82,7 @@ These are then passed through the activation function and used in subsequent lay
 \textbf{Advantages of Batch Normalization:} \\
 Batch Normalization helps mitigate issues like vanishing and exploding gradients, making it easier to train deep networks. By normalizing the activations, it maintains a more consistent and stable gradient flow during backpropagation.
 Neural networks with Batch Normalization also tend to converge faster. The normalization of activations helps prevent the network from getting stuck in plateaus, enabling quicker convergence to a better solution.
-Batch Normalization introduces a degree of regularization by reducing internal covariate shift (the change in the distribution of activations between layers). This often leads to better generalization and reduced overfitting.
+Batch Normalization introduces a degree of regularization by reducing internal covariate shift (the change in the distribution of activations between layers). This often leads to better generalization and reduced overfitting. \cite{batchnormexp}
 
 %------------------------------------------------------------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ The Huber loss is defined as:
 	\end{cases}
 \end{align}
 
-Preferred Use Case: Huber loss is useful when dealing with regression problems where the dataset may contain outliers.
+Preferred Use Case: Huber loss is useful when dealing with regression problems where the dataset may contain outliers. \cite{huberloss}
 
 \subsubsection{Mean Squared Error (MSE) Loss}
 
@@ -138,7 +138,7 @@ The equation for Smooth L1 loss is:
 	\end{cases}    
 \end{align}
 
-Preferred Use Case: Smooth L1 loss is suitable for regression problems, especially when dealing with data that may contain outliers.
+Preferred Use Case: Smooth L1 loss is suitable for regression problems, especially when dealing with data that may contain outliers. \cite{smoothloss}
 
 \subsubsection{Optimal Loss Function for Bomberman}
 
@@ -172,7 +172,7 @@ RMSprop works by maintaing a moving average of squared gradients for each parame
 This adaptation helps to scale down the learning rate for parameters with high variance in gradients and scale up the learning rate for those with low variance.
 RMSprop includes a smoothing term to avoid dividing by very small values, ensuring stable convergence.
 
-RMSprop is well-suited for tasks with non-stationary objectives or sparse data. It helps mitigate the vanishing and exploding gradient problems and often converges faster than traditional SGD.
+RMSprop is well-suited for tasks with non-stationary objectives or sparse data. It helps mitigate the vanishing and exploding gradient problems and often converges faster than traditional SGD. \cite{rmsprop}
 
 \subsubsection{AdamW}
 
@@ -189,7 +189,7 @@ AdamW (Adam with Weight Decay) is a variant of the Adam optimizer that addresses
 Where \(m_t\) and \(v_t\) are the first and second moments of gradients, respectively, \(\beta_1\) and \(\beta_2\) are the exponential decay rates for the first and second moments (typically set to values like 0.9 and 0.999), \(\hat{m}_t\) and \(\hat{v}_t\) are bias-corrected estimates of the moments, \(\nabla J(\theta_t)\) represents the gradient of the loss with respect to the model parameters \(\theta_t\), \(\alpha\) is the learning rate, \(\epsilon\) is a small constant and \(\lambda\) is the weight decay term, which adds L2 regularization to the parameter updates. \\
 AdamW computes the gradients of the loss and updates the moving averages of the first and second moments of gradients.
 It then includes an L2 regularization term in the parameter update step, which helps prevent overfitting.
-By integrating weight decay, AdamW offers better generalization and improved performance in tasks with large neural networks.\\
+By integrating weight decay, AdamW offers better generalization and improved performance in tasks with large neural networks. \cite{adamW}\\
 
 AdamW is generally well-suited for a wide range of deep learning tasks and is particularly effective when dealing with large networks and complex datasets.
 
