@@ -1,10 +1,11 @@
+\newpage
 \fancyhead[R]{Kevin Klein}
 
 \subsection{Imitation-based RL Agent}
 
 In this section, we present the results of our second-best agent, which was intended to learn to mimic the rule-based agent initially and 
-then be improved through deep Q-learning (which, as it turned out, did not work well). We illustrate the training process to imitate the rule-based 
-agent and the subsequent training with deep Q-learning using diagrams.
+then be improved through Deep Q-learning (which, as it turned out, did not work well). We illustrate the training process to imitate the rule-based 
+agent and the subsequent training with Deep Q-learning using diagrams.
 
 \begin{figure}[H]
     \centering
@@ -44,7 +45,7 @@ After the agent achieved a decent level of play through training with the rule-b
 to further enhance its performance to enable it to defeat other rule-based agents in the game. We thought the agent could 
 leverage the knowledge of the rule-based agent and then learn better or different strategies more easily and quickly. 
 However, as observed in \autoref{fig:secondAgentTrainChart2}, that was not the case. With increasing training, the agent's performance deteriorated, 
-reaching a point where it could no longer play the game. Even when we increased the number of rounds to 20000, there was no improvement. 
+reaching a point where it could no longer play the game. Even when we increased the number of rounds to 20,000, there was no improvement. 
 We tried various approaches, such as changing the loss function, optimizer, learning rate, and so on, but nothing helped. We suspected that 
 one possible reason for this issue was the use of different training sets with labels that were entirely 
 differently dimensioned, which might have caused the problem.
