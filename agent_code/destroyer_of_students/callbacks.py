@@ -56,22 +56,16 @@ def act(self, game_state: dict) -> str:
     x1, x2, x3, x4 = state_to_features(game_state)
 
     if self.train:
-        eps_start = 0.9
-        eps_end = 0.1
-        eps_decay = 1000
-        round = 1
         sample = random.random()
         eps_threshold = 0.05
 
         if sample > eps_threshold:
-            round += 1
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
                 action_done = torch.argmax(self.policy_net(x1, x2, x3, x4))
         else:
-            round += 1
             action_done = torch.tensor([[np.random.choice([i for i in range(0, 6)], p=[.2, .2, .2, .2, .1, .1])]],
                                        dtype=torch.long, device=device)
 

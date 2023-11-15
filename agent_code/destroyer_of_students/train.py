@@ -58,36 +58,38 @@ class DQN(nn.Module):
 
     def __init__(self, n_actions):
         super(DQN, self).__init__()
-        self.input1 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
-        self.input2 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
-        self.input3 = nn.Conv2d(1, 1, kernel_size=(3, 3), stride=1)
+        self.input1 = nn.Conv2d(1, 10, kernel_size=(3, 3), stride=1)
+        self.input2 = nn.Conv2d(1, 10, kernel_size=(3, 3), stride=1)
+        self.input3 = nn.Conv2d(1, 10, kernel_size=(3, 3), stride=1)
         self.input4 = nn.Linear(16, 12)
 
-        self.hidden11 = nn.Linear(49, 25)
-        self.hidden12 = nn.Linear(49, 25)
-        self.hidden13 = nn.Linear(49, 25)
+        self.hidden11 = nn.Linear(490, 250)
+        self.hidden12 = nn.Linear(490, 250)
+        self.hidden13 = nn.Linear(490, 250)
         self.hidden14 = nn.Linear(12, 6)
 
-        self.hidden2 = nn.Linear(81, 30)
+        self.hidden2 = nn.Linear(756, 100)
 
-        self.output = nn.Linear(30, n_actions)
+        self.output = nn.Linear(100, n_actions)
 
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, x1, x2, x3, x4):
+    def forward(self, x1, x2, x3, x4, start_dim=0):
 
         x1 = F.relu(self.input1(x1))
         x2 = F.relu(self.input2(x2))
         x3 = F.relu(self.input3(x3))
         x4 = F.relu(self.input4(x4))
 
-        x1 = F.relu(self.hidden11(x1.view(x1.size(0), -1)))
-        x2 = F.relu(self.hidden12(x2.view(x2.size(0), -1)))
-        x3 = F.relu(self.hidden13(x3.view(x3.size(0), -1)))
-        x4 = F.relu(self.hidden14(x4.view(x4.size(0), -1)))
+        #print(x4.shape)
 
-        x = torch.cat((x1, x2, x3, x4), dim=1)
+        x1 = F.relu(self.hidden11(torch.flatten(x1, start_dim=start_dim)))
+        x2 = F.relu(self.hidden12(torch.flatten(x2, start_dim=start_dim)))
+        x3 = F.relu(self.hidden13(torch.flatten(x3, start_dim=start_dim)))
+        x4 = F.relu(self.hidden14(torch.flatten(x4, start_dim=start_dim)))
+
+        x = torch.cat((x1, x2, x3, x4), dim=-1)
         x = F.relu(self.hidden2(x))
 
         x = self.output(x)
@@ -208,7 +210,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
 
     states = list(zip(*batch.state))
 
-    state_action_values = self.policy_net(torch.stack(states[0]), torch.stack(states[1]), torch.stack(states[2]), torch.stack(states[3])).to(device)
+    state_action_values = self.policy_net(torch.stack(states[0]), torch.stack(states[1]), torch.stack(states[2]), torch.stack(states[3]), start_dim=1).to(device)
     state_action_values = state_action_values.gather(1, action_batch)
 
     input1 = torch.zeros((BATCH_SIZE_CORRECTED, 1, 9, 9), device = device)
@@ -222,7 +224,7 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
                 input2[i] = s[1]
                 input3[i] = s[2]
                 input4[i] = s[3]
-    next_state_values = self.target_net(input1, input2, input3, input4).to(device)
+    next_state_values = self.target_net(input1, input2, input3, input4, start_dim=1).to(device)
     next_state_values = next_state_values.max(1)[0]
 
     # Compute the expected Q values
